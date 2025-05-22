@@ -11,5 +11,10 @@ boolean turn;
 Roland enemy;
 Gebura player;
 void setup(){
-  
+  enemy = new Roland();
+  player = new Gebura();
+  background = loadImage("phase1bg.png");
+}
+void draw(){
+  image(background,0,0);
 }

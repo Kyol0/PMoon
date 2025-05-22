@@ -13,5 +13,5 @@ public class Gebura{
     stagger = 67;
     emotion = 0;
     emotionlvl = 1;
-
+  }
 }
