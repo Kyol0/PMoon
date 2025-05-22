@@ -18,14 +18,13 @@ void setup(){
   background = loadImage("backgrounds/phase1bg.png");
   sfx = new SoundFile(this,"music/Roland_1.mp3");
   sfx.play();
-  //Rsprite = loadImage("roland/rolandidle.png");
-  Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
+  Gsprite = loadShape("kali/Kali-combat-sprite-idle.svg");
 }
 void draw(){
   image(background,0,0);
   if(!sfx.isPlaying())
     sfx.loop();
-  image(Gsprite,900,200);
+   shape(Gsprite, 200,500,26,26);
 }
 void phasechange(){
   
