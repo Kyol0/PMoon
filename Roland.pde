@@ -10,4 +10,25 @@ public class Roland{
     stagger = 350;
     phase = 1;
   }
+  public void changeHP(int value){
+    hp=value;
+  }
+  public void damaged(int damage){
+    hp-=damage;
+    if(hp<0) 
+      hp=0;
+  }
+  public void changeStagger(int value){
+    stagger = value;
+  }
+  public void staggerDamage(int damage){
+    stagger-=damage;
+    if(stagger<0)
+      stagger = 0;
+  }
+  public void rollDice(){
+    for(int i=0;i<dice.length;i++){
+      dice[i]=(int)(random(5)+2);   
+    }
+  }
 }

@@ -1,6 +1,7 @@
 public class Gebura{
   int hp;
   int light;
+  int maxLight;
   int emotion;
   int emotionlvl;
   int stagger;
@@ -12,6 +13,65 @@ public class Gebura{
     hp = 120;
     stagger = 67;
     emotion = 0;
-    emotionlvl = 1;
+    emotionlvl = 0;
+  }
+  public void recoverHP(int value){
+    hp+=value;
+  }
+  public void damaged(int damage){
+    hp-=damage;
+    if(hp<0) 
+      hp=0;
+  }
+  public void changeStagger(int value){
+    stagger = value;
+  }
+  public void staggerDamage(int damage){
+    stagger-=damage;
+    if(stagger<0)
+      stagger = 0;
+  }
+  public void rollDice(){
+    for(int i=0;i<dice.length;i++){
+      dice[i]=(int)(random(5)+2);   
+    }
+  }
+  public void changeLight(int value){
+    light+=value;
+    if(light> maxLight)
+      light=maxLight;
+    if(light<0)
+      light= 0;
+  }
+  public void changeMaxLight(int value){
+    maxLight=value;
+  }
+  public void lvlEmotion(){
+    emotionlvl++;
+    if(emotionlvl>5)
+      emotionlvl=5;
+  }
+  public void addEmotion(int value){
+    emotion+=value;
+    if(emotionlvl==0&&emotion==3){
+      lvlEmotion();
+      emotion=0;
+    }
+    else if(emotionlvl==1&&emotion==3){
+      lvlEmotion();
+      emotion=0;
+    }
+    else if(emotionlvl==2&&emotion==5){
+      lvlEmotion();
+      emotion=0;
+    }
+    else if(emotionlvl==3&&emotion==7){
+      lvlEmotion();
+      emotion=0;
+    }
+    else if(emotionlvl==4&&emotion==9){
+      lvlEmotion();
+      emotion=0;
+    }
   }
 }
