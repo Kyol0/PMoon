@@ -15,7 +15,7 @@ public class Roland{
   }
   public void damaged(int damage){
     hp-=damage;
-    if(hp<0) 
+    if(hp<0)
       hp=0;
   }
   public void changeStagger(int value){
