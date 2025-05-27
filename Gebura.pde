@@ -14,6 +14,8 @@ public class Gebura{
     stagger = 67;
     emotion = 0;
     emotionlvl = 0;
+    maxLight = 4;
+    light = maxLight;
   }
   public void recoverHP(int value){
     hp+=value;
