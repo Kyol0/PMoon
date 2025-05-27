@@ -111,10 +111,12 @@ void draw(){
       image(Gsprite,700,340,122.4,142.6);
       image(Rsprite,300,340,35.2,99.6);
       circle(width/2,0,100);      
-
-      rect(width/2-15,height-200,100,200);
+      rect(width/2-15,height-100,100,100);
       page = loadImage("kali/CardManifestEgoArt.png");
-      //image(page,width/2-15,height-175,100,76);
+      image(page,width/2-15,height-80,100,76);
+      textSize(15);
+      fill(0);
+      text(player.egopages[2],width/2-15,height-82);
     }
     
     //if it is attack phase, uses the cards selected and compare the values of kalis and rolands
