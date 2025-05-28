@@ -1,4 +1,4 @@
-import processing.sound.*;
+ import processing.sound.*;
 SoundFile bgm;
 SoundFile sfx;
 ArrayList<Integer> hand;
@@ -53,6 +53,7 @@ void draw(){
   
   //changes the background and the music to align with the phase change
   if(phasechange){
+    turn = false;
     if(enemy.phase==2){
       enemy.changeHP(1000);
       enemy.changeStagger(150);
@@ -80,19 +81,36 @@ void draw(){
         bgm.play();
       }
     }
-    fill(255,255,0);
     image(background,0,0,1152,648);
     image(Gsprite,700,340,122.4,142.6);
     image(Rsprite,300,340,35.2,99.6);
+    fill(0);
     rect(0,0,200,200);
+    fill(255);
+    textSize(50);
+    text("Roland",15,55);
+    textSize(25);
+    text("HP:" + enemy.hp,15,75);
+    text("Stagger: " + enemy.stagger,15,130);
+    fill(255,0,0);
     rect(width-200,0,200,200);
+    fill(0);
+    textSize(50);
+    text("Gebura",width-170,55);
+    textSize(25);
+    text("HP: " + player.hp,width-170,75);
+    text("Stagger: " + player.stagger,width-170,110);
+    text("Light: " + player.light + "/" + player.maxLight,width-170,145);
+    text("Emotion Lvl: " + player.emotionlvl,width-170,180);
+    fill(255,255,0);
     circle(width/2,0,100);
     shape(transition,i,0);
     if(i>=width){
       phasechange = false;
       i=0;
       draw=true;
-      drawn = true;
+      drawn = false;
+      current= 0;
     }
     i+=200;
   }  
@@ -102,16 +120,15 @@ void draw(){
     image(background,0,0,1152,648);
     image(Gsprite,700,340,122.4,142.6);
     image(Rsprite,300,340,35.2,99.6);
-    fill(255,0,0);
-    rect(0,0,200,200);
     fill(0);
+    rect(0,0,200,200);
+    fill(255);
     textSize(50);
     text("Roland",15,55);
     textSize(25);
-    println(enemy.hp);
     text("HP:" + enemy.hp,15,75);
     text("Stagger: " + enemy.stagger,15,130);
-    fill(0,0,255);
+    fill(255,0,0);
     rect(width-200,0,200,200);
     fill(0);
     textSize(50);
@@ -134,20 +151,45 @@ void draw(){
         hand.add((int)random(5));
         drawn=true;
       }
-      for(int i=0;i<current;i++){
+      SoundFile cards = new SoundFile(this,"other_sfx/Card_Over.wav");
+      for(int i=0;i<=current;i++){
         PImage page;
+        if(hand.get(i)==0){
+         fill(0,255,0);
+         page = loadImage("kali/CardUpstandingSlashArt.png");
+        }
+        else if(hand.get(i)==1){
+          fill(0,255,0);
+          page = loadImage("kali/CardSpearArt.png");
+        }
+        else if(hand.get(i)==2){
+          fill(0,255,0);
+          page = loadImage("kali/CardLevelSlashArt.png");
+        }
+        else if(hand.get(i)==3){
+          fill(0,0,255);
+          page = loadImage("kali/CardFocusSpiritArt.png");
+        }
+        else if(hand.get(i)==4){
+          fill(255,0,255);
+          page = loadImage("kali/CardOnrushArt.png");
+        }
+        else{
+          fill(255,0,0);
+          page = loadImage("kali/CardManifestEgoArt.png");
+        }
         rect(width/4*3-105*(i+1),height-125,100,125);
-        page = loadImage("kali/CardManifestEgoArt.png");
         image(page,width/4*3-105*(i+1),height-100,100,76);
         textSize(12);
         fill(0);
-        text(player.egopages[2],width/4*3-105*(i+1)+10,height-105);
+        text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
       }
-      delay(150);
+      cards.play();
       current++;
       if(current>=hand.size()){
         draw = false;
         turn = true;
+        current = 0;
       }
     }
     
@@ -158,15 +200,37 @@ void draw(){
     
     //if it is the selection phase, lets the player select cards and compare them through hovering over the cards
     if(turn){
-      for(int i=0;i<current;i++){
+      for(int i=0;i<hand.size();i++){
         PImage page;
-        fill(0,255,0);
+        if(hand.get(i)==0){
+         fill(0,255,0);
+         page = loadImage("kali/CardUpstandingSlashArt.png");
+        }
+        else if(hand.get(i)==1){
+          fill(0,255,0);
+          page = loadImage("kali/CardSpearArt.png");
+        }
+        else if(hand.get(i)==2){
+          fill(0,255,0);
+          page = loadImage("kali/CardLevelSlashArt.png");
+        }
+        else if(hand.get(i)==3){
+          fill(0,0,255);
+          page = loadImage("kali/CardFocusSpiritArt.png");
+        }
+        else if(hand.get(i)==4){
+          fill(255,0,255);
+          page = loadImage("kali/CardOnrushArt.png");
+        }
+        else{
+          fill(255,0,0);
+          page = loadImage("kali/CardManifestEgoArt.png");
+        }
         rect(width/4*3-105*(i+1),height-125,100,125);
-        page = loadImage("kali/CardManifestEgoArt.png");
         image(page,width/4*3-105*(i+1),height-100,100,76);
         textSize(12);
         fill(0);
-        text(player.egopages[2],width/4*3-105*(i+1)+10,height-105);
+        text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
       }  
     }
     
