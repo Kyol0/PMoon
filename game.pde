@@ -1,8 +1,8 @@
 import processing.sound.*;
-int scene;
 SoundFile bgm;
 SoundFile sfx;
 ArrayList<Integer> hand;
+int current = 0; //index for the cards that will show up on the screen;
 ArrayList<Integer> selected;
 PImage Rfx;
 PImage Gfx;
@@ -11,15 +11,15 @@ PImage Rsprite;
 PImage Gsprite;
 Roland enemy;
 Gebura player;
-boolean phasechange=true;
-boolean draw;
-boolean turn;
-boolean animate;
-boolean finished;
+boolean phasechange=true;//phase change
+boolean draw; //draw phase
+boolean drawn; //if cards have been drawn
+boolean turn; //selecting cards phase
+boolean animate; //attack phase
+boolean finished; //if the game has ended
+boolean EGO; //checks if EGO cards has been selected
 float i = 0;
-PShape transition;
-int cardX;
-int cardY;
+PShape transition; //transition screen
 void setup(){
   size(1152,648);
   
@@ -30,7 +30,11 @@ void setup(){
   //player setup
   player = new Gebura();
   Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
-  scene = 1;
+  hand = new ArrayList<Integer>();
+  selected = new ArrayList<Integer>();
+  hand.add((int)random(5));
+  hand.add((int)random(5));
+  hand.add((int)random(5));
   
   
   //load image
@@ -49,10 +53,8 @@ void draw(){
   
   //changes the background and the music to align with the phase change
   if(phasechange){
-    println("here");
     if(enemy.phase==2){
       enemy.changeHP(1000);
-      println(enemy.hp);
       enemy.changeStagger(150);
       background=loadImage("backgrounds/phase2bg.png");
       if(!bgm.isPlaying()){
@@ -90,12 +92,13 @@ void draw(){
       phasechange = false;
       i=0;
       draw=true;
+      drawn = true;
     }
     i+=200;
   }  
   else{
     
-    //makes sure the background is constantly being refreshed
+    //makes sure the background is constantly being refreshed with the display board to show health and other stats
     image(background,0,0,1152,648);
     image(Gsprite,700,340,122.4,142.6);
     image(Rsprite,300,340,35.2,99.6);
@@ -118,28 +121,53 @@ void draw(){
     text("Stagger: " + player.stagger,width-170,110);
     text("Light: " + player.light + "/" + player.maxLight,width-170,145);
     text("Emotion Lvl: " + player.emotionlvl,width-170,180);
-
     fill(255,255,0);
     circle(width/2,0,100);
+   
     //checks if the music is looping
     if(!bgm.isPlaying())
       bgm.loop();
     
     //if it is draw phase, draws cards randomly based on how many cards will be in your hand
     if(draw){
-      PImage page;
-      
-      rect(width/2-15,height-125,100,100);
-      page = loadImage("kali/CardManifestEgoArt.png");
-      image(page,width/2-15,height-100,100,76);
-      textSize(15);
-      fill(0);
-      text(player.egopages[2],width/2-15,height-105);
+      if(!drawn){
+        hand.add((int)random(5));
+        drawn=true;
+      }
+      for(int i=0;i<current;i++){
+        PImage page;
+        rect(width/4*3-105*(i+1),height-125,100,125);
+        page = loadImage("kali/CardManifestEgoArt.png");
+        image(page,width/4*3-105*(i+1),height-100,100,76);
+        textSize(12);
+        fill(0);
+        text(player.egopages[2],width/4*3-105*(i+1)+10,height-105);
+      }
+      delay(150);
+      current++;
+      if(current>=hand.size()){
+        draw = false;
+        turn = true;
+      }
     }
     
     //if it is attack phase, uses the cards selected and compare the values of kalis and rolands
     if(animate){
       
+    }
+    
+    //if it is the selection phase, lets the player select cards and compare them through hovering over the cards
+    if(turn){
+      for(int i=0;i<current;i++){
+        PImage page;
+        fill(0,255,0);
+        rect(width/4*3-105*(i+1),height-125,100,125);
+        page = loadImage("kali/CardManifestEgoArt.png");
+        image(page,width/4*3-105*(i+1),height-100,100,76);
+        textSize(12);
+        fill(0);
+        text(player.egopages[2],width/4*3-105*(i+1)+10,height-105);
+      }  
     }
     
     //check if Gebura is dead
@@ -225,7 +253,6 @@ void reset(){
   finished = false;
   phasechange = true;
   i=0;
-  scene = 1;
 }
 
 void mouseClicked(){
