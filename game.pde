@@ -32,6 +32,7 @@ void setup(){
   Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
   scene = 1;
   
+  
   //load image
   background = loadImage("backgrounds/phase1bg2.png");
   
@@ -50,39 +51,39 @@ void draw(){
   if(phasechange){
     println("here");
     if(enemy.phase==2){
-      enemy.hp=1000;
-      enemy.stagger=150;
+      enemy.changeHP(1000);
+      println(enemy.hp);
+      enemy.changeStagger(150);
       background=loadImage("backgrounds/phase2bg.png");
       if(!bgm.isPlaying()){
         bgm = new SoundFile(this,"music/Roland_2.mp3");
         bgm.play();
       }
-      enemy.changeHP(100);
     }
     if(enemy.phase==3){
-      enemy.hp=400;
-      enemy.stagger=200;
+      enemy.changeHP(400);
+      enemy.changeStagger(200);
       background=loadImage("backgrounds/phase3bg.png");
       if(!bgm.isPlaying()){
         bgm = new SoundFile(this,"music/Roland_3.mp3");
         bgm.play();
       }
-      enemy.changeHP(100);
     }
     if(enemy.phase==4){
-      enemy.hp=999;
-      enemy.stagger=500;
+      enemy.changeHP(999);
+      enemy.changeStagger(500);
       background=loadImage("backgrounds/phase4bg.png");
       if(!bgm.isPlaying()){
         bgm = new SoundFile(this,"music/Gone_Angels.mp3");
         bgm.play();
       }
-      enemy.changeHP(100);
     }
     fill(255,255,0);
     image(background,0,0,1152,648);
     image(Gsprite,700,340,122.4,142.6);
     image(Rsprite,300,340,35.2,99.6);
+    rect(0,0,200,200);
+    rect(width-200,0,200,200);
     circle(width/2,0,100);
     shape(transition,i,0);
     if(i>=width){
@@ -95,10 +96,30 @@ void draw(){
   else{
     
     //makes sure the background is constantly being refreshed
-    fill(255,255,0);
     image(background,0,0,1152,648);
     image(Gsprite,700,340,122.4,142.6);
     image(Rsprite,300,340,35.2,99.6);
+    fill(255,0,0);
+    rect(0,0,200,200);
+    fill(0);
+    textSize(50);
+    text("Roland",15,55);
+    textSize(25);
+    println(enemy.hp);
+    text("HP:" + enemy.hp,15,75);
+    text("Stagger: " + enemy.stagger,15,130);
+    fill(0,0,255);
+    rect(width-200,0,200,200);
+    fill(0);
+    textSize(50);
+    text("Gebura",width-170,55);
+    textSize(25);
+    text("HP: " + player.hp,width-170,75);
+    text("Stagger: " + player.stagger,width-170,110);
+    text("Light: " + player.light + "/" + player.maxLight,width-170,145);
+    text("Emotion Lvl: " + player.emotionlvl,width-170,180);
+
+    fill(255,255,0);
     circle(width/2,0,100);
     //checks if the music is looping
     if(!bgm.isPlaying())
@@ -107,16 +128,13 @@ void draw(){
     //if it is draw phase, draws cards randomly based on how many cards will be in your hand
     if(draw){
       PImage page;
-      image(background,0,0,1152,648);
-      image(Gsprite,700,340,122.4,142.6);
-      image(Rsprite,300,340,35.2,99.6);
-      circle(width/2,0,100);      
-      rect(width/2-15,height-100,100,100);
+      
+      rect(width/2-15,height-125,100,100);
       page = loadImage("kali/CardManifestEgoArt.png");
-      image(page,width/2-15,height-80,100,76);
+      image(page,width/2-15,height-100,100,76);
       textSize(15);
       fill(0);
-      text(player.egopages[2],width/2-15,height-82);
+      text(player.egopages[2],width/2-15,height-105);
     }
     
     //if it is attack phase, uses the cards selected and compare the values of kalis and rolands
