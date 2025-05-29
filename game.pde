@@ -18,8 +18,10 @@ boolean turn; //selecting cards phase
 boolean animate; //attack phase
 boolean finished; //if the game has ended
 boolean EGO; //checks if EGO cards has been selected
+boolean EgoOn; //checks if red mist is active
 float i = 0;
 PShape transition; //transition screen
+int scene; //current turn
 void setup(){
   size(1152,648);
   
@@ -34,7 +36,9 @@ void setup(){
   selected = new ArrayList<Integer>();
   hand.add((int)random(5));
   hand.add((int)random(5));
-  hand.add((int)random(5));
+  dupeCheck((int)random(5));
+  scene = 1;
+  
   
   
   //load image
@@ -53,6 +57,7 @@ void draw(){
   
   //changes the background and the music to align with the phase change
   if(phasechange){
+    scene++;
     turn = false;
     if(enemy.phase==2){
       enemy.changeHP(1000);
@@ -148,35 +153,42 @@ void draw(){
     //if it is draw phase, draws cards randomly based on how many cards will be in your hand
     if(draw){
       if(!drawn){
-        hand.add((int)random(5));
+        dupeCheck((int)random(5));
         drawn=true;
       }
       SoundFile cards = new SoundFile(this,"other_sfx/Card_Over.wav");
       for(int i=0;i<=current;i++){
         PImage page;
-        if(hand.get(i)==0){
-         fill(0,255,0);
-         page = loadImage("kali/CardUpstandingSlashArt.png");
-        }
-        else if(hand.get(i)==1){
-          fill(0,255,0);
-          page = loadImage("kali/CardSpearArt.png");
-        }
-        else if(hand.get(i)==2){
-          fill(0,255,0);
-          page = loadImage("kali/CardLevelSlashArt.png");
-        }
-        else if(hand.get(i)==3){
-          fill(0,0,255);
-          page = loadImage("kali/CardFocusSpiritArt.png");
-        }
-        else if(hand.get(i)==4){
-          fill(255,0,255);
-          page = loadImage("kali/CardOnrushArt.png");
+        
+        //classifies kali's normal pages
+        if(!EGO){
+          if(hand.get(i)==0){
+           fill(146, 200, 139);
+           page = loadImage("kali/CardUpstandingSlashArt.png");
+          }
+          else if(hand.get(i)==1){
+            fill(146, 200, 139);
+            page = loadImage("kali/CardSpearArt.png");
+          }
+          else if(hand.get(i)==2){
+            fill(146, 200, 139);
+            page = loadImage("kali/CardLevelSlashArt.png");
+          }
+          else if(hand.get(i)==3){
+            fill(95, 139, 227);
+            page = loadImage("kali/CardFocusSpiritArt.png");
+          }
+          else if(hand.get(i)==4){
+            fill(124, 62, 219);
+            page = loadImage("kali/CardOnrushArt.png");
+          }
+          else{
+            fill(124, 34, 60);
+            page = loadImage("kali/CardGreaterSplitverticalArt.png");
+          }
         }
         else{
-          fill(255,0,0);
-          page = loadImage("kali/CardManifestEgoArt.png");
+          
         }
         rect(width/4*3-105*(i+1),height-125,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
@@ -203,28 +215,28 @@ void draw(){
       for(int i=0;i<hand.size();i++){
         PImage page;
         if(hand.get(i)==0){
-         fill(0,255,0);
+         fill(146, 200, 139);
          page = loadImage("kali/CardUpstandingSlashArt.png");
         }
         else if(hand.get(i)==1){
-          fill(0,255,0);
+          fill(146, 200, 139);
           page = loadImage("kali/CardSpearArt.png");
         }
         else if(hand.get(i)==2){
-          fill(0,255,0);
+          fill(146, 200, 139);
           page = loadImage("kali/CardLevelSlashArt.png");
         }
         else if(hand.get(i)==3){
-          fill(0,0,255);
+          fill(95, 139, 227);
           page = loadImage("kali/CardFocusSpiritArt.png");
         }
         else if(hand.get(i)==4){
-          fill(255,0,255);
+          fill(124, 62, 219);
           page = loadImage("kali/CardOnrushArt.png");
         }
         else{
-          fill(255,0,0);
-          page = loadImage("kali/CardManifestEgoArt.png");
+          fill(124, 34, 60);
+          page = loadImage("kali/CardGreaterSplitVerticalArt.png");
         }
         rect(width/4*3-105*(i+1),height-125,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
@@ -314,7 +326,7 @@ void reset(){
   bgm = new SoundFile(this,"music/Roland_1.mp3");
   bgm.play();
   transition.setFill(color(255,255,0));
-  finished = false;
+  finished = false; 
   phasechange = true;
   i=0;
 }
@@ -324,5 +336,19 @@ void mouseClicked(){
     if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85)
       reset();  
   }
+  else
   enemy.damaged(999);
+}
+
+//adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
+void dupeCheck(int i){
+  int count=0;
+  for(int c: hand){
+     if(c==i) 
+       count++;
+  }
+  if(count >=2||(i==4&&count>=1))
+    dupeCheck((int)random(5));
+  else
+    hand.add(i);
 }
