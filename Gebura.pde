@@ -3,6 +3,7 @@ public class Gebura{
   int light;
   int maxLight;
   int emotion;
+  int egoCount;
   int emotionlvl;
   int stagger;
   String[] pages = { "Upstanding Slash", "Spear", "Level Slash", "Focus Spirit", "Onrush"};
@@ -24,6 +25,7 @@ public class Gebura{
     emotionlvl = 0;
     maxLight = 4;
     light = maxLight;
+    egoCount = 9;
   }
   public void recoverHP(int value){
     hp+=value;
@@ -63,6 +65,7 @@ public class Gebura{
   }
   public void addEmotion(int value){
     emotion+=value;
+    egoCount+=value;
     if(emotionlvl==0&&emotion==3){
       lvlEmotion();
       emotion=0;

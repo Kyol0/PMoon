@@ -57,7 +57,6 @@ void draw(){
   
   //changes the background and the music to align with the phase change
   if(phasechange){
-    scene++;
     turn = false;
     if(enemy.phase==2){
       enemy.changeHP(1000);
@@ -107,6 +106,13 @@ void draw(){
     text("Stagger: " + player.stagger,width-170,110);
     text("Light: " + player.light + "/" + player.maxLight,width-170,145);
     text("Emotion Lvl: " + player.emotionlvl,width-170,180);
+   if(player.egoCount >=9){
+      fill(158,0,0);
+      circle(width,height,200);
+      textSize(25);
+      fill(0);
+      text("E.G.O \nPages", width-70,height-50);
+    }
     fill(255,255,0);
     circle(width/2,0,100);
     shape(transition,i,0);
@@ -133,6 +139,7 @@ void draw(){
     textSize(25);
     text("HP:" + enemy.hp,15,75);
     text("Stagger: " + enemy.stagger,15,130);
+    text("Scene: " + scene, 15,160);
     fill(255,0,0);
     rect(width-200,0,200,200);
     fill(0);
@@ -145,6 +152,20 @@ void draw(){
     text("Emotion Lvl: " + player.emotionlvl,width-170,180);
     fill(255,255,0);
     circle(width/2,0,100);
+    if(player.egoCount >=9){
+      fill(158,0,0);
+      circle(width,height,200);
+      textSize(25);
+      fill(0);
+      text("E.G.O \nPages", width-70,height-50);
+    }
+    else{
+      fill(150);
+      circle(width,height,200);
+      textSize(25);
+      fill(0);
+      text("E.G.O \nPages", width-70,height-50);
+    }
    
     //checks if the music is looping
     if(!bgm.isPlaying())
@@ -161,7 +182,6 @@ void draw(){
         PImage page;
         
         //classifies kali's normal pages
-        if(!EGO){
           if(hand.get(i)==0){
            fill(146, 200, 139);
            page = loadImage("kali/CardUpstandingSlashArt.png");
@@ -182,13 +202,17 @@ void draw(){
             fill(124, 62, 219);
             page = loadImage("kali/CardOnrushArt.png");
           }
-          else{
-            fill(124, 34, 60);
-            page = loadImage("kali/CardGreaterSplitverticalArt.png");
-          }
+          else if(hand.get(i)==5){
+          fill(124, 34, 60);
+          page = loadImage("kali/CardGreaterSplitVerticalArt.png");
         }
-        else{
+        else if(hand.get(i)==6){ //Manifest EGO
           
+          page = loadImage("kali/CardManifestEgoArt.png");
+        }
+        else{  //Greater Split: Horizontal
+          fill(124,34,60);
+          page = loadImage("kali/CardManifestEgoArt.png"); 
         }
         rect(width/4*3-105*(i+1),height-125,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
@@ -234,9 +258,26 @@ void draw(){
           fill(124, 62, 219);
           page = loadImage("kali/CardOnrushArt.png");
         }
-        else{
+        else if(hand.get(i)==5){
           fill(124, 34, 60);
           page = loadImage("kali/CardGreaterSplitVerticalArt.png");
+        }
+        else if(hand.get(i)==6){ //Manifest EGO
+          
+          page = loadImage("kali/CardManifestEgoArt.png");
+        }
+        else{  //Greater Split: Horizontal
+          fill(124,34,60);
+          page = loadImage("kali/CardManifestEgoArt.png"); 
+        }
+        if(mouseX>width/4*3-105*(i+1)&&mouseX<width/4*3-105*(i+1)+100&&mouseY>height-125&&mouseY<height){
+          stroke(255,255,0);
+        }
+        else{
+          stroke(0);
+        }
+        if(mouseX>sqrt(pow(200,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(200,2)-pow(width-mouseX,2))){
+          
         }
         rect(width/4*3-105*(i+1),height-125,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
@@ -244,6 +285,7 @@ void draw(){
         fill(0);
         text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
       }  
+      stroke(0);
     }
     
     //check if Gebura is dead
@@ -329,6 +371,11 @@ void reset(){
   finished = false; 
   phasechange = true;
   i=0;
+  hand = new ArrayList<Integer>();
+  hand.add((int)random(5));
+  hand.add((int)random(5));
+  dupeCheck((int)random(5));
+  scene = 1;
 }
 
 void mouseClicked(){
@@ -337,9 +384,12 @@ void mouseClicked(){
       reset();  
   }
   else
-  enemy.damaged(999);
+  enemy.damaged(1000);
 }
-
+void keyPressed(){
+  if(key == 'e')
+    player.addEmotion(1);
+}
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
 void dupeCheck(int i){
   int count=0;
