@@ -271,6 +271,13 @@ void draw(){
           page = loadImage("kali/CardManifestEgoArt.png"); 
         }
         if(mouseX>width/4*3-105*(i+1)&&mouseX<width/4*3-105*(i+1)+100&&mouseY>height-125&&mouseY<height){
+          rect(width-210,210,210,250);
+          textSize(15);
+          text("Somethiung",width-200,235);
+          image(page,width-210,240,210,159);
+          
+          
+          
           stroke(255,255,0);
         }
         else{
@@ -281,7 +288,7 @@ void draw(){
         textSize(12);
         fill(0);
         text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
-        if(mouseX>sqrt(pow(200,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(200,2)-pow(width-mouseX,2))&&player.egoCount>=9){
+        if(mouseX>sqrt(pow(100,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(100,2)-pow(width-mouseX,2))&&player.egoCount>=9){
           stroke(255,255,0);
         }
         else
@@ -306,21 +313,78 @@ void draw(){
         for(int i = 1; i<=5;i++){
           PImage rPages;
           if(i==1){
-            rPages = loadImage("roland/CardAtelierLogicArt.png"); 
+            rPages = loadImage("roland/Atelier Logic.png"); 
           }
-          if(i==2){
-            rPages = loadImage("roland/CardZelkovaWorkshopArt.png");
+          else if(i==2){
+            rPages = loadImage("roland/Zelkova Workshop.png");
           }
-          if(i==3){
-            rPages = loadImage("roland/CardAllasWorkshopArt.png");
+          else if(i==3){
+            rPages = loadImage("roland/Allas Workshop.png");
           }
-          if(i==4){
-            rPages = loadImage("roland/CardRangaWorkshopArt.png"); 
+          else if(i==4){
+            rPages = loadImage("roland/Ranga Workshop.png"); 
           }
           else{
-            rPages = loadImage("roland/CardOldBoysWorkshopArt.png"); 
+            rPages = loadImage("roland/Old Boys Workshop.png"); 
           }
-          image(rPages,200+i*100,350,100,76);
+          image(rPages,200+i*55,300,50,38);
+        }
+      }
+      if(scene%4 ==2){
+        for(int i = 1; i<=5;i++){
+          PImage rPages;
+          if(i==1){
+            rPages = loadImage("roland/Wheels Industry.png"); 
+          }
+          else if(i==2){
+            rPages = loadImage("roland/Old Boys Workshop.png");
+          }
+          else if(i==3){
+            rPages = loadImage("roland/DurandalPage.png");
+          }
+          else if(i==4){
+            rPages = loadImage("roland/Allas Workshop.png"); 
+          }
+          else{
+            rPages = loadImage("roland/Ranga Workshop.png"); 
+          }
+          image(rPages,200+i*55,300,50,38);
+        }
+      }
+      if(scene%4 ==3){
+        for(int i = 1; i<=5;i++){
+          PImage rPages;
+          if(i==1){
+            rPages = loadImage("roland/Crystal Atelier.png"); 
+          }
+          else if(i==2){
+            rPages = loadImage("roland/Mook Workshop.png");
+          }
+          else if(i==3){
+            rPages = loadImage("roland/Ranga Workshop.png");
+          }
+          else if(i==4){
+            rPages = loadImage("roland/DurandalPage.png"); 
+          }
+          else{
+            rPages = loadImage("roland/Atelier Logic.png"); 
+          }
+          image(rPages,200+i*55,300,50,38);
+        }
+      }
+      if(scene%4 ==0){
+        for(int i = 1; i<=3;i++){
+          PImage rPages;
+          if(i==1){
+            rPages = loadImage("roland/Furioso.png"); 
+          }
+          else if(i==2){
+            rPages = loadImage("roland/DurandalPage.png");
+          }
+          else{
+            rPages = loadImage("roland/DurandalPage.png"); 
+          }
+          image(rPages,200+i*55,300,50,38);
         }
       }
     }
@@ -344,9 +408,6 @@ void draw(){
         rect(width/2-130,height*3/4-15,200,100);
         textSize(50);
         if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85){
-          if(mousePressed)
-            fill(100);
-          else
             fill(255,0,0);
         }
         else  
@@ -420,14 +481,18 @@ void mouseClicked(){
     if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85)
       reset();  
   }
-  else
-  enemy.damaged(1000);
 }
 void keyPressed(){
   if(key == 'e')
     player.addEmotion(1);
   if(key=='f')
     player.egoCount = 0;
+  if(key=='d')
+    enemy.damaged(1000);
+  if(key=='p')
+    player.damaged(1000);
+  if(key=='s')
+    scene++;
 }
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
 void dupeCheck(int i){
