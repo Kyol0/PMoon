@@ -286,7 +286,6 @@ void draw(){
         }
         else
           stroke(0);
-        println(player.egoCount);
         if(player.egoCount >=9){
           fill(158,0,0);
           circle(width,height,200);
@@ -303,6 +302,27 @@ void draw(){
         }
       }  
       stroke(0);
+      if(scene%4 ==1){
+        for(int i = 1; i<=5;i++){
+          PImage rPages;
+          if(i==1){
+            rPages = loadImage("roland/CardAtelierLogicArt.png"); 
+          }
+          if(i==2){
+            rPages = loadImage("roland/CardZelkovaWorkshopArt.png");
+          }
+          if(i==3){
+            rPages = loadImage("roland/CardAllasWorkshopArt.png");
+          }
+          if(i==4){
+            rPages = loadImage("roland/CardRangaWorkshopArt.png"); 
+          }
+          else{
+            rPages = loadImage("roland/CardOldBoysWorkshopArt.png"); 
+          }
+          image(rPages,200+i*100,350,100,76);
+        }
+      }
     }
     
     //check if Gebura is dead
