@@ -276,14 +276,31 @@ void draw(){
         else{
           stroke(0);
         }
-        if(mouseX>sqrt(pow(200,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(200,2)-pow(width-mouseX,2))){
-          
-        }
         rect(width/4*3-105*(i+1),height-125,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
         textSize(12);
         fill(0);
         text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
+        if(mouseX>sqrt(pow(200,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(200,2)-pow(width-mouseX,2))&&player.egoCount>=9){
+          stroke(255,255,0);
+        }
+        else
+          stroke(0);
+        println(player.egoCount);
+        if(player.egoCount >=9){
+          fill(158,0,0);
+          circle(width,height,200);
+          textSize(25);
+          fill(0);
+          text("E.G.O \nPages", width-70,height-50);
+        }
+        else{
+          fill(150);
+          circle(width,height,200);
+          textSize(25);
+          fill(0);
+          text("E.G.O \nPages", width-70,height-50);
+        }
       }  
       stroke(0);
     }
@@ -389,6 +406,8 @@ void mouseClicked(){
 void keyPressed(){
   if(key == 'e')
     player.addEmotion(1);
+  if(key=='f')
+    player.egoCount = 0;
 }
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
 void dupeCheck(int i){
