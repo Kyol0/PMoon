@@ -263,26 +263,52 @@ void draw(){
           page = loadImage("kali/CardGreaterSplitVerticalArt.png");
         }
         else if(hand.get(i)==6){ //Manifest EGO
-          
+          fill(234, 205, 1);
           page = loadImage("kali/CardManifestEgoArt.png");
         }
         else{  //Greater Split: Horizontal
           fill(124,34,60);
           page = loadImage("kali/CardManifestEgoArt.png"); 
         }
+        
+        //mouse hover to show description of the card of kalis
         if(mouseX>width/4*3-105*(i+1)&&mouseX<width/4*3-105*(i+1)+100&&mouseY>height-125&&mouseY<height){
-          rect(width-210,210,210,250);
+          rect(width-210,210,210,330);
           textSize(15);
-          text("Somethiung",width-200,235);
+          fill(0);
+          text(player.pages[hand.get(i)],width-200,235);
           image(page,width-210,240,210,159);
-          
-          
-          
-          stroke(255,255,0);
-        }
-        else{
-          stroke(0);
-        }
+          text(player.pagedesc[hand.get(i)],width-200,410);
+          if(hand.get(i)==0){
+           fill(146, 200, 139);
+          }
+          else if(hand.get(i)==1){
+            fill(146, 200, 139);
+          }
+          else if(hand.get(i)==2){
+            fill(146, 200, 139);
+          }
+          else if(hand.get(i)==3){
+            fill(95, 139, 227);
+          }
+          else if(hand.get(i)==4){
+            fill(124, 62, 219);
+          }
+          else if(hand.get(i)==5){
+            fill(124, 34, 60);
+          }
+          else if(hand.get(i)==6){ //Manifest EGO
+            fill(234, 205, 1);
+          }
+          else{  //Greater Split: Horizontal
+            fill(124,34,60);
+          }
+            
+            stroke(255,255,0);
+          }
+          else{
+            stroke(0);
+          }
         rect(width/4*3-105*(i+1),height-125,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
         textSize(12);
@@ -309,6 +335,8 @@ void draw(){
         }
       }  
       stroke(0);
+      
+      //black silence cards used
       if(scene%4 ==1){
         for(int i = 1; i<=5;i++){
           PImage rPages;
@@ -326,6 +354,41 @@ void draw(){
           }
           else{
             rPages = loadImage("roland/Old Boys Workshop.png"); 
+          }
+          
+          
+          //hover over black silence cards
+          if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
+           stroke(255,255,0);
+           rect(200+i*55,300,50,38);
+           stroke(0);
+           int page;
+           if(i==1){
+            fill(95, 139, 227);
+            page = 7;
+            }
+            else if(i==2){
+              fill(146, 200, 139);
+              page = 2;
+            }
+            else if(i==3){
+              fill(95, 139, 227);
+              page=0;
+            }
+            else if(i==4){
+              fill(146, 200, 139); 
+              page= 5;
+            }
+            else{
+              fill(146, 200, 139); 
+              page = 3;
+            }
+            rect(0,210,210,330);
+            image(rPages,0,240,210,159);
+            fill(0);
+            textSize(15);
+            text(enemy.pages[page],10,235);
+            text(enemy.pagedesc[page],10,440);
           }
           image(rPages,200+i*55,300,50,38);
         }
@@ -348,6 +411,40 @@ void draw(){
           else{
             rPages = loadImage("roland/Ranga Workshop.png"); 
           }
+          
+          //hover over black silence cards
+          if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
+           stroke(255,255,0);
+           rect(200+i*55,300,50,38);
+           stroke(0);
+           int page;
+           if(i==1){
+            fill(124, 62, 219);
+            page = 1;
+            }
+            else if(i==2){
+              fill(146, 200, 139);
+              page = 3;
+            }
+            else if(i==3){
+              fill(124, 62, 219);
+              page=8;
+            }
+            else if(i==4){
+              fill(95, 139, 227); 
+              page= 0;
+            }
+            else{
+              fill(146, 200, 139); 
+              page = 5;
+            }
+            rect(0,210,210,330);
+            image(rPages,0,240,210,159);
+            fill(0);
+            textSize(15);
+            text(enemy.pages[page],10,235);
+            text(enemy.pagedesc[page],10,440);
+          }
           image(rPages,200+i*55,300,50,38);
         }
       }
@@ -369,6 +466,40 @@ void draw(){
           else{
             rPages = loadImage("roland/Atelier Logic.png"); 
           }
+          
+          //hover over black silence cards
+          if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
+           stroke(255,255,0);
+           rect(200+i*55,300,50,38);
+           stroke(0);
+           int page;
+           if(i==1){
+            fill(95, 139, 227);
+            page = 6;
+            }
+            else if(i==2){
+              fill(95, 139, 227);
+              page = 5;
+            }
+            else if(i==3){
+              fill(146, 200, 139);
+              page=5;
+            }
+            else if(i==4){
+              fill(124, 62, 219); 
+              page= 8;
+            }
+            else{
+              fill(95, 139, 227); 
+              page = 7;
+            }
+            rect(0,210,210,330);
+            image(rPages,0,240,210,159);
+            fill(0);
+            textSize(15);
+            text(enemy.pages[page],10,235);
+            text(enemy.pagedesc[page],10,440);
+          }
           image(rPages,200+i*55,300,50,38);
         }
       }
@@ -384,9 +515,36 @@ void draw(){
           else{
             rPages = loadImage("roland/DurandalPage.png"); 
           }
+          
+          //hover over black silence cards
+          if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
+           stroke(255,255,0);
+           rect(200+i*55,300,50,38);
+           stroke(0);
+           int page;
+           if(i==1){
+            fill(234, 205, 1);
+            page = 9;
+            }
+            else if(i==2){
+              fill(124, 62, 219);
+              page = 8;
+            }
+            else{
+              fill(124, 62, 219); 
+              page = 8;
+            }
+            rect(0,210,210,330);
+            image(rPages,0,240,210,159);
+            fill(0);
+            textSize(15);
+            text(enemy.pages[page],10,235);
+            text(enemy.pagedesc[page],10,440);
+          }
           image(rPages,200+i*55,300,50,38);
         }
       }
+      
     }
     
     //check if Gebura is dead
