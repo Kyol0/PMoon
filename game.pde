@@ -1,4 +1,4 @@
- import processing.sound.*;
+import processing.sound.*;
 SoundFile bgm;
 SoundFile sfx;
 ArrayList<Integer> hand;
@@ -236,6 +236,28 @@ void draw(){
     
     //if it is the selection phase, lets the player select cards and compare them through hovering over the cards
     if(turn){
+      
+      //opens the ego cards page
+      if(EGO){
+        fill(158,0,0);
+        rect(0,220,width,height);
+        textSize(30);
+        fill(0);
+        text("Select E.G.O Page",20,250);
+        if(player.emotionlvl<4){
+          fill(124,34,60);
+          rect(width/2-205/2,height-198,205,400);
+          PImage ego = loadImage("kali/CardGreaterSplitVerticalArt.png");
+          image(ego,width/2-205/2,height-140,205,155);
+        }
+        else if(EgoOn){
+          
+        }
+        else{
+          
+        }
+      }
+      else{
       for(int i=0;i<hand.size();i++){
         PImage page;
         if(hand.get(i)==0){
@@ -544,7 +566,7 @@ void draw(){
           image(rPages,200+i*55,300,50,38);
         }
       }
-      
+      }
     }
     
     //check if Gebura is dead
@@ -638,6 +660,9 @@ void mouseClicked(){
   if(finished){
     if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85)
       reset();  
+  }
+  if(turn&&mouseX>sqrt(pow(100,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(100,2)-pow(width-mouseX,2))&&player.egoCount>=9){
+     EGO = true;
   }
 }
 void keyPressed(){
