@@ -170,6 +170,8 @@ void draw(){
     //checks if the music is looping
     if(!bgm.isPlaying())
       bgm.loop();
+      
+    SoundFile cards = new SoundFile(this,"other_sfx/Card_Over.wav");
     
     //if it is draw phase, draws cards randomly based on how many cards will be in your hand
     if(draw){
@@ -177,7 +179,6 @@ void draw(){
         dupeCheck((int)random(5));
         drawn=true;
       }
-      SoundFile cards = new SoundFile(this,"other_sfx/Card_Over.wav");
       for(int i=0;i<=current;i++){
         PImage page;
         
@@ -244,17 +245,94 @@ void draw(){
         textSize(30);
         fill(0);
         text("Select E.G.O Page",20,250);
-        if(player.emotionlvl<4){
-          fill(124,34,60);
-          rect(width/2-205/2,height-198,205,400);
-          PImage ego = loadImage("kali/CardGreaterSplitVerticalArt.png");
-          image(ego,width/2-205/2,height-140,205,155);
-        }
-        else if(EgoOn){
-          
+        if(mouseX>width-50&&mouseY>height-50){
+          stroke(255,255,0);
         }
         else{
-          
+          stroke(0);
+        }
+        fill(124,34,60);
+        rect(width-50,height-50,50,50);
+        fill(0);
+        textSize(25);
+        text("X", width-30,height-20);
+        stroke(0);
+        if(player.emotionlvl<4){
+          fill(124,34,60);
+          if(mouseX>width/2-205/2&&mouseY>height-380&&mouseX<width/2-205/2+210&&mouseY<height-380+330){
+            stroke(255,255,0);
+          }
+          rect(width/2-205/2,height-380,210,330);
+          stroke(0);
+          PImage ego = loadImage("kali/CardGreaterSplitVerticalArt.png");
+          textSize(15);
+          fill(0);
+          text(player.egopages[1],width/2-205/2+15,height-360);
+          text(player.pagedesc[6],width/2-205/2+15,height-170);
+          image(ego,width/2-205/2,height-350,210,159);
+        }
+        else if(EgoOn){
+          for(int c= 1; c<=2;c++){
+            fill(124,34,60);
+           if(c==1){
+             if(mouseX>width/2-205/2-110&&mouseY>height-380&&mouseX<width/2-205/2+110&&mouseY<height-380+330){
+                stroke(255,255,0);
+              }
+             rect(width/2-205/2-110,height-380,210,330);
+             stroke(0);
+             PImage ego = loadImage("kali/CardGreaterSplitVerticalArt.png");
+              textSize(15);
+              fill(0);
+              text(player.egopages[1],width/2-205/2-105,height-360);
+              text(player.pagedesc[6],width/2-205/2-105,height-170);
+              image(ego,width/2-205/2-110,height-350,210,159);
+           }
+           else if(c==2){
+             if(mouseX>width/2-205/2+120&&mouseY>height-380&&mouseX<width/2-205/2+340&&mouseY<height-380+330){
+                stroke(255,255,0);
+              }
+             rect(width/2-205/2+120,height-380,210,330);
+             stroke(0);
+             PImage ego = loadImage("kali/CardManifestEgoArt.png");
+              textSize(15);
+              fill(0);
+              text(player.egopages[0],width/2-205/2+125,height-360);
+              text(player.pagedesc[5],width/2-205/2+125,height-170);
+              image(ego,width/2-205/2+120,height-350,210,159);
+           }
+          }
+        }
+        else{
+          for(int c= 1; c<=2;c++){
+            fill(124,34,60);
+           if(c==1){
+             if(mouseX>width/2-205/2-110&&mouseY>height-380&&mouseX<width/2-205/2+110&&mouseY<height-380+330){
+                stroke(255,255,0);
+              }
+             rect(width/2-205/2-110,height-380,210,330);
+             stroke(0);
+             PImage ego = loadImage("kali/CardGreaterSplitVerticalArt.png");
+              textSize(15);
+              fill(0);
+              text(player.egopages[1],width/2-205/2-102,height-360);
+              text(player.pagedesc[6],width/2-205/2-102,height-170);
+              image(ego,width/2-205/2-110,height-350,210,159);
+           }
+           else if(c==2){
+             if(mouseX>width/2-205/2+120&&mouseY>height-380&&mouseX<width/2-205/2+340&&mouseY<height-380+330){
+                stroke(255,255,0);
+              }
+             fill(234, 205, 1);
+             rect(width/2-205/2+120,height-380,210,330);
+             stroke(0);
+             PImage ego = loadImage("kali/CardManifestEgoArt.png");
+              textSize(15);
+              fill(0);
+              text(player.egopages[2],width/2-205/2+125,height-360);
+              text(player.pagedesc[7],width/2-205/2+125,height-170);
+              image(ego,width/2-205/2+120,height-350,210,159);
+           }
+          }
         }
       }
       else{
@@ -378,6 +456,7 @@ void draw(){
             rPages = loadImage("roland/Old Boys Workshop.png"); 
           }
           
+
           
           //hover over black silence cards
           if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
@@ -657,12 +736,17 @@ void reset(){
 }
 
 void mouseClicked(){
+  SoundFile click = new SoundFile(this,"other_sfx/Ui_Click.wav");
+  click.play();
   if(finished){
     if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85)
       reset();  
   }
   if(turn&&mouseX>sqrt(pow(100,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(100,2)-pow(width-mouseX,2))&&player.egoCount>=9){
      EGO = true;
+  }
+  if(mouseX>width-50&&mouseY>height-50&&EGO){
+    EGO=false;
   }
 }
 void keyPressed(){
