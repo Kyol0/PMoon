@@ -1,6 +1,8 @@
 import processing.sound.*;
 SoundFile bgm;
 SoundFile sfx;
+PVector mousepos = new PVector(mouseX,mouseY);
+PVector corner;
 ArrayList<Integer> hand;
 int current = 0; //index for the cards that will show up on the screen;
 ArrayList<Integer> selected;
@@ -22,9 +24,10 @@ boolean EgoOn; //checks if red mist is active
 float i = 0;
 PShape transition; //transition screen
 int scene; //current turn
+
 void setup(){
   size(1152,648);
-  
+  corner = new PVector(width,height);
   //enemy setup
   enemy = new Roland();
   Rsprite = loadImage("roland/rolandidle.png");
@@ -55,6 +58,9 @@ void setup(){
 }
 void draw(){
   
+  //update mouseposition;
+  mousepos.set(mouseX,mouseY);
+
   //changes the background and the music to align with the phase change
   if(phasechange){
     turn = false;
@@ -414,7 +420,7 @@ void draw(){
         textSize(12);
         fill(0);
         text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
-        if(mouseX>sqrt(pow(100,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(100,2)-pow(width-mouseX,2))&&player.egoCount>=9){
+        if(mousepos.dist(corner)<=100&&player.egoCount>=9){
           stroke(255,255,0);
         }
         else
@@ -737,17 +743,19 @@ void reset(){
 
 void mouseClicked(){
   SoundFile click = new SoundFile(this,"other_sfx/Ui_Click.wav");
+
   click.play();
   if(finished){
     if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85)
       reset();  
   }
-  if(turn&&mouseX>sqrt(pow(100,2)-pow(height-mouseY,2))&&mouseX<width&&mouseY<height&&mouseY>sqrt(pow(100,2)-pow(width-mouseX,2))&&player.egoCount>=9){
-     EGO = true;
-  }
   if(mouseX>width-50&&mouseY>height-50&&EGO){
     EGO=false;
   }
+  else if(turn&&mousepos.dist(corner)<=100&&player.egoCount>=9){
+     EGO = true;
+  }
+  
 }
 void keyPressed(){
   if(key == 'e')
@@ -760,6 +768,8 @@ void keyPressed(){
     player.damaged(1000);
   if(key=='s')
     scene++;
+  if(key=='m')
+    EgoOn = true;
 }
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
 void dupeCheck(int i){

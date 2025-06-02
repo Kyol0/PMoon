@@ -15,7 +15,7 @@ public class Gebura{
     " Light: 3 \n If target is Staggered, use this \n page again \n dmg: 14~26",
     " Light: 6 \n dmg: 28~42",
     " Light: 5 \n Destroy a Combat Page set\n on another die of the target \n dmg: 20~39",
-    " Light: 2 \n Single Use - Restore 6 Light;\n fully recover Stagger. Manifest\n the E.G.O. of the Red Mist next Scene. \n block: 8~15 \n evade: 8~15"};
+    " Light: 2 \n Single Use - Restore 6 Light;\n fully recover Stagger. Manifest\n the E.G.O. of the Red Mist next\n Scene. \n block: 8~15 \n evade: 8~15"};
   String[] egopages = {"Great Split: Horizontal", "Great Split: Vertical", "Manifest: E.G.O."};
   int[] dice;
   public Gebura(){
