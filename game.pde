@@ -24,7 +24,9 @@ boolean EgoOn; //checks if red mist is active
 float i = 0;
 PShape transition; //transition screen
 int scene; //current turn
-
+boolean spear; //checks if spear passive is active
+boolean level; //checks if level slash passive is active
+boolean upstand; //checks if upstanding slash passive is active 
 void setup(){
   size(1152,648);
   corner = new PVector(width,height);
@@ -211,21 +213,26 @@ void draw(){
           }
           else if(hand.get(i)==5){
           fill(124, 34, 60);
-          page = loadImage("kali/CardGreaterSplitVerticalArt.png");
-        }
-        else if(hand.get(i)==6){ //Manifest EGO
-          
           page = loadImage("kali/CardManifestEgoArt.png");
         }
+        else if(hand.get(i)==6){ //Manifest EGO
+          fill(124, 34, 60);
+          page = loadImage("kali/CardGreaterSplitVerticalArt.png");
+        }
         else{  //Greater Split: Horizontal
-          fill(124,34,60);
+          fill(234, 205, 1);
           page = loadImage("kali/CardManifestEgoArt.png"); 
         }
-        rect(width/4*3-105*(i+1),height-125,100,125);
+        rect(width/4*3-105*(i+1),height-120,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
-        textSize(12);
+        textSize(10);
         fill(0);
-        text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
+        if(hand.get(i)<=4){
+          text(player.pages[hand.get(i)],width/4*3-105*(i+1)+3,height-105);
+        }
+        else{
+          text(player.egopages[hand.get(i)-5],width/4*3-105*(i+1)+3,height-105);
+        }
       }
       cards.play();
       current++;
@@ -364,16 +371,16 @@ void draw(){
           fill(124, 62, 219);
           page = loadImage("kali/CardOnrushArt.png");
         }
-        else if(hand.get(i)==5){
+        else if(hand.get(i)==5){ // Greater Split Horizontal
+          fill(124, 34, 60);
+          page = loadImage("kali/CardManifestEgoArt.png"); 
+        }
+        else if(hand.get(i)==6){ 
           fill(124, 34, 60);
           page = loadImage("kali/CardGreaterSplitVerticalArt.png");
         }
-        else if(hand.get(i)==6){ //Manifest EGO
+        else{  //Manifest Ego
           fill(234, 205, 1);
-          page = loadImage("kali/CardManifestEgoArt.png");
-        }
-        else{  //Greater Split: Horizontal
-          fill(124,34,60);
           page = loadImage("kali/CardManifestEgoArt.png"); 
         }
         
@@ -382,9 +389,14 @@ void draw(){
           rect(width-210,210,210,330);
           textSize(15);
           fill(0);
-          text(player.pages[hand.get(i)],width-200,235);
-          image(page,width-210,240,210,159);
+          if(hand.get(i)<=4){
+            text(player.pages[hand.get(i)],width-200,235);
+          }
+          else{
+            text(player.egopages[hand.get(i)-5],width-200,235);
+          }
           text(player.pagedesc[hand.get(i)],width-200,410);
+          image(page,width-210,240,210,159);
           if(hand.get(i)==0){
            fill(146, 200, 139);
           }
@@ -403,11 +415,11 @@ void draw(){
           else if(hand.get(i)==5){
             fill(124, 34, 60);
           }
-          else if(hand.get(i)==6){ //Manifest EGO
-            fill(234, 205, 1);
+          else if(hand.get(i)==6){ //Horizontal
+            fill(124, 34, 60);
           }
-          else{  //Greater Split: Horizontal
-            fill(124,34,60);
+          else{  //Ego
+            fill(234, 205, 1);
           }
             
             stroke(255,255,0);
@@ -415,11 +427,17 @@ void draw(){
           else{
             stroke(0);
           }
-        rect(width/4*3-105*(i+1),height-125,100,125);
+        rect(width/4*3-105*(i+1),height-120,100,125);
         image(page,width/4*3-105*(i+1),height-100,100,76);
-        textSize(12);
+        textSize(10);
         fill(0);
-        text(player.pages[hand.get(i)],width/4*3-105*(i+1)+10,height-105);
+        if(hand.get(i)<=4){
+          text(player.pages[hand.get(i)],width/4*3-105*(i+1)+3,height-105);
+        }
+        else{
+          text(player.egopages[hand.get(i)-5],width/4*3-105*(i+1)+3,height-105);
+        }
+        
         if(mousepos.dist(corner)<=100&&player.egoCount>=9){
           stroke(255,255,0);
         }
@@ -745,15 +763,88 @@ void mouseClicked(){
   SoundFile click = new SoundFile(this,"other_sfx/Ui_Click.wav");
 
   click.play();
+
+  //prompt for when the game is over
   if(finished){
     if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85)
       reset();  
   }
+
+  //close ego page
   if(mouseX>width-50&&mouseY>height-50&&EGO){
     EGO=false;
   }
+
+  //open ego page
   else if(turn&&mousepos.dist(corner)<=100&&player.egoCount>=9){
      EGO = true;
+  }
+
+  //select ego page
+  if(turn&&EGO){
+    if(player.emotionlvl<4){
+      if(mouseX>width/2-205/2&&mouseY>height-380&&mouseX<width/2-205/2+210&&mouseY<height-380+330){
+        hand.add(6);
+        EGO=false;
+        player.egoCount-=9;
+      }
+    }
+    else if(EgoOn){
+      if(mouseX>width/2-205/2-110&&mouseY>height-380&&mouseX<width/2-205/2+110&&mouseY<height-380+330){
+        hand.add(6);
+        EGO=false;
+        player.egoCount-=9;
+      }
+      else if(mouseX>width/2-205/2+120&&mouseY>height-380&&mouseX<width/2-205/2+340&&mouseY<height-380+330){
+        hand.add(5);
+        EGO=false;
+        player.egoCount-=9;
+      }
+    }
+    else{
+      if(mouseX>width/2-205/2-110&&mouseY>height-380&&mouseX<width/2-205/2+110&&mouseY<height-380+330){
+        hand.add(6);
+        EGO=false;
+        player.egoCount-=9;
+      }
+      else if(mouseX>width/2-205/2+120&&mouseY>height-380&&mouseX<width/2-205/2+340&&mouseY<height-380+330){
+        hand.add(7);
+        EGO=false;
+        player.egoCount-=9;
+      }
+    }
+  }
+
+  //select pages in hand
+  else if(turn){
+    for(int r=0;r<hand.size();r++){
+      if(mouseX>width/4*3-105*(r+1)&&mouseX<width/4*3-105*(r+1)+100&&mouseY>height-125&&mouseY<height){
+        if(hand.get(r)==0){
+
+        }
+        else if(hand.get(r)==1){
+
+        }
+        else if(hand.get(r)==2){
+
+        }
+        else if(hand.get(r)==3){
+
+        }
+        else if(hand.get(r)==4){
+
+        }
+        else if(hand.get(r)==5){
+
+        }
+        else if(hand.get(r)==6){
+
+        }
+        else if(hand.get(r)==7){
+
+        }
+      }
+    }
   }
   
 }
@@ -780,6 +871,9 @@ void dupeCheck(int i){
   }
   if(count >=2||(i==4&&count>=1))
     dupeCheck((int)random(5));
+  else if(hand.size()>=8){
+    return;
+  }
   else
     hand.add(i);
 }
