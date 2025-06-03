@@ -3,9 +3,11 @@ SoundFile bgm;
 SoundFile sfx;
 PVector mousepos = new PVector(mouseX,mouseY);
 PVector corner;
+PVector button;
 ArrayList<Integer> hand;
 int current = 0; //index for the cards that will show up on the screen;
 ArrayList<Integer> selected;
+ArrayList<Integer> eSelected = new ArrayList<Integer>();
 PImage Rfx;
 PImage Gfx;
 PImage background;
@@ -30,6 +32,8 @@ boolean upstand; //checks if upstanding slash passive is active
 void setup(){
   size(1152,648);
   corner = new PVector(width,height);
+  button = new PVector(width/2,0);
+
   //enemy setup
   enemy = new Roland();
   Rsprite = loadImage("roland/rolandidle.png");
@@ -245,12 +249,16 @@ void draw(){
     
     //if it is attack phase, uses the cards selected and compare the values of kalis and rolands
     if(animate){
+      println("attack phase");
       
     }
     
     //if it is the selection phase, lets the player select cards and compare them through hovering over the cards
     if(turn){
       
+      while(eSelected.size()>0){
+        eSelected.remove(0);
+      }
       //opens the ego cards page
       if(EGO){
         fill(158,0,0);
@@ -458,80 +466,80 @@ void draw(){
           text("E.G.O \nPages", width-70,height-50);
         }
       
-          //show selected cards
-        for(int r=0; r<selected.size();r++){
-          PImage selection;
-          if(selected.get(r)==0){
-            selection = loadImage("kali/CardUpstandingSlashArt.png");
-          }
-          else if(selected.get(r)==1){
-            selection = loadImage("kali/CardSpearArt.png");
-          }
-          else if(selected.get(r)==2){
-            selection = loadImage("kali/CardLevelSlashArt.png");
-          }
-          else if(selected.get(r)==3){
-            selection = loadImage("kali/CardFocusSpiritArt.png");
-          }
-          else if(selected.get(r)==4){
-            selection = loadImage("kali/CardOnrushArt.png");
-          }
-          else if(selected.get(r)==5){ // Greater Split Horizontal
-            selection = loadImage("kali/CardManifestEgoArt.png"); 
-          }
-          else if(selected.get(r)==6){ 
-            selection = loadImage("kali/CardGreaterSplitVerticalArt.png");
-          }
-          else{  //Manifest Ego
-            selection = loadImage("kali/CardManifestEgoArt.png"); 
-          }
-          if(mouseX>600+r*55&&mouseX<600+r*55+50&&mouseY>300&&mouseY<338){
-            stroke(255,255,0);
-            rect(600+r*55,300,50,38);
-            stroke(0);
-            
-            if(selected.get(r)==0){
-            fill(146, 200, 139);
-            }
-            else if(selected.get(r)==1){
-              fill(146, 200, 139);
-            }
-            else if(selected.get(r)==2){
-              fill(146, 200, 139);
-            }
-            else if(selected.get(r)==3){
-              fill(95, 139, 227);
-            }
-            else if(selected.get(r)==4){
-              fill(124, 62, 219);
-            }
-            else if(selected.get(r)==5){
-              fill(124, 34, 60);
-            }
-            else if(selected.get(r)==6){ //Horizontal
-              fill(124, 34, 60);
-            }
-            else{  //Ego
-              fill(234, 205, 1);
-            }
-            rect(width-210,210,210,330);
-            textSize(15);
-            fill(0);
-            if(selected.get(r)<=4){
-              text(player.pages[selected.get(r)],width-200,235);
-            }
-            else{
-              text(player.egopages[selected.get(r)-5],width-200,235);
-            }
-            text(player.pagedesc[selected.get(r)],width-200,410);
-            image(selection,width-210,240,210,159);
-          }
-          image(selection,600+r*55,300,50,38);
-        }
+          
       }  
       stroke(0);
 
-       
+      //show selected cards
+      for(int r=0; r<selected.size();r++){
+        PImage selection;
+        if(selected.get(r)==0){
+          selection = loadImage("kali/CardUpstandingSlashArt.png");
+        }
+        else if(selected.get(r)==1){
+          selection = loadImage("kali/CardSpearArt.png");
+        }
+        else if(selected.get(r)==2){
+          selection = loadImage("kali/CardLevelSlashArt.png");
+        }
+        else if(selected.get(r)==3){
+          selection = loadImage("kali/CardFocusSpiritArt.png");
+        }
+        else if(selected.get(r)==4){
+          selection = loadImage("kali/CardOnrushArt.png");
+        }
+        else if(selected.get(r)==5){ // Greater Split Horizontal
+          selection = loadImage("kali/CardManifestEgoArt.png"); 
+        }
+        else if(selected.get(r)==6){ 
+          selection = loadImage("kali/CardGreaterSplitVerticalArt.png");
+        }
+        else{  //Manifest Ego
+          selection = loadImage("kali/CardManifestEgoArt.png"); 
+        }
+        if(mouseX>600+r*55&&mouseX<600+r*55+50&&mouseY>300&&mouseY<338){
+          stroke(255,255,0);
+          rect(600+r*55,300,50,38);
+          stroke(0);
+          
+          if(selected.get(r)==0){
+          fill(146, 200, 139);
+          }
+          else if(selected.get(r)==1){
+            fill(146, 200, 139);
+          }
+          else if(selected.get(r)==2){
+            fill(146, 200, 139);
+          }
+          else if(selected.get(r)==3){
+            fill(95, 139, 227);
+          }
+          else if(selected.get(r)==4){
+            fill(124, 62, 219);
+          }
+          else if(selected.get(r)==5){
+            fill(124, 34, 60);
+          }
+          else if(selected.get(r)==6){ //Horizontal
+            fill(124, 34, 60);
+          }
+          else{  //Ego
+            fill(234, 205, 1);
+          }
+          rect(width-210,210,210,330);
+          textSize(15);
+          fill(0);
+          if(selected.get(r)<=4){
+            text(player.pages[selected.get(r)],width-200,235);
+          }
+          else{
+            text(player.egopages[selected.get(r)-5],width-200,235);
+          }
+          text(player.pagedesc[selected.get(r)],width-200,410);
+          image(selection,width-210,240,210,159);
+        }
+        image(selection,600+r*55,300,50,38);
+      }
       
       //black silence cards used
       if(scene%4 ==1){
@@ -539,18 +547,23 @@ void draw(){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Atelier Logic.png"); 
+            eSelected.add(7);
           }
           else if(i==2){
             rPages = loadImage("roland/Zelkova Workshop.png");
+            eSelected.add(2);
           }
           else if(i==3){
             rPages = loadImage("roland/Allas Workshop.png");
+            eSelected.add(0);
           }
           else if(i==4){
             rPages = loadImage("roland/Ranga Workshop.png"); 
+            eSelected.add(5);
           }
           else{
             rPages = loadImage("roland/Old Boys Workshop.png"); 
+            eSelected.add(3);
           }
 
           //hover over black silence cards
@@ -594,18 +607,23 @@ void draw(){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Wheels Industry.png"); 
+            eSelected.add(1);
           }
           else if(i==2){
             rPages = loadImage("roland/Old Boys Workshop.png");
+            eSelected.add(3);
           }
           else if(i==3){
             rPages = loadImage("roland/DurandalPage.png");
+            eSelected.add(8);
           }
           else if(i==4){
             rPages = loadImage("roland/Allas Workshop.png"); 
+            eSelected.add(0);
           }
           else{
             rPages = loadImage("roland/Ranga Workshop.png"); 
+            eSelected.add(5);
           }
           
           //hover over black silence cards
@@ -649,18 +667,23 @@ void draw(){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Crystal Atelier.png"); 
+            eSelected.add(6);
           }
           else if(i==2){
             rPages = loadImage("roland/Mook Workshop.png");
+            eSelected.add(4);
           }
           else if(i==3){
             rPages = loadImage("roland/Ranga Workshop.png");
+            eSelected.add(5);
           }
           else if(i==4){
             rPages = loadImage("roland/DurandalPage.png"); 
+            eSelected.add(8);
           }
           else{
             rPages = loadImage("roland/Atelier Logic.png"); 
+            eSelected.add(7);
           }
           
           //hover over black silence cards
@@ -704,12 +727,15 @@ void draw(){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Furioso.png"); 
+            eSelected.add(9);
           }
           else if(i==2){
             rPages = loadImage("roland/DurandalPage.png");
+            eSelected.add(8);
           }
           else{
             rPages = loadImage("roland/DurandalPage.png"); 
+            eSelected.add(8);
           }
           
           //hover over black silence cards
@@ -972,6 +998,12 @@ void mouseClicked(){
         }
         hand.add(selected.remove(r));
       }
+    }
+
+    //start battle phase
+    if(mousepos.sub(button).mag()<=50){
+      turn = false;
+      animate = true;
     }
   }
   
