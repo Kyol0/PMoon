@@ -6,8 +6,8 @@ PVector corner;
 PVector button;
 ArrayList<Integer> hand;
 int current = 0; //index for the cards that will show up on the screen;
-ArrayList<Integer> selected;
-ArrayList<Integer> eSelected = new ArrayList<Integer>();
+ArrayList<Integer> selected; // selected cards
+ArrayList<Integer> eSelected = new ArrayList<Integer>(); //rolands cards
 PImage Rfx;
 PImage Gfx;
 PImage background;
@@ -29,6 +29,8 @@ int scene; //current turn
 boolean spear; //checks if spear passive is active
 boolean level; //checks if level slash passive is active
 boolean upstand; //checks if upstanding slash passive is active 
+int pAtk; // number of attacks in a certain card for player
+int eAtk; // number of attacks in a page for roland
 void setup(){
   size(1152,648);
   corner = new PVector(width,height);
@@ -127,6 +129,8 @@ void draw(){
     }
     fill(255,255,0);
     circle(width/2,0,100);
+    fill(42, 222, 114);
+    quad(width/2,0,width/2+10,25,width/2,70,width/2-10,25);
     shape(transition,i,0);
     if(i>=width){
       phasechange = false;
@@ -164,6 +168,8 @@ void draw(){
     text("Emotion Lvl: " + player.emotionlvl,width-170,180);
     fill(255,255,0);
     circle(width/2,0,100);
+    fill(52, 168, 235);
+    quad(width/2,0,width/2+10,25,width/2,70,width/2-10,25);
     if(player.egoCount >=9){
       fill(158,0,0);
       circle(width,height,200);
@@ -966,7 +972,6 @@ void mouseClicked(){
           }
         }
       }
-      println(selected);
     }
     
     //deselect pages from selected
@@ -999,14 +1004,14 @@ void mouseClicked(){
         hand.add(selected.remove(r));
       }
     }
-
-    //start battle phase
-    if(mousepos.sub(button).mag()<=50){
+  }
+  //start battle phase
+    if(turn &&mousepos.sub(button).mag()<=50){
       turn = false;
       animate = true;
+      SoundFile start = new SoundFile(this, "Finger_Snapping.wav");
+      start.play();
     }
-  }
-  
 }
 void keyPressed(){
   if(key == 'e')

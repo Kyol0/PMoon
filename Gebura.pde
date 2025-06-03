@@ -17,7 +17,7 @@ public class Gebura{
     " Light: 5 \n Destroy a Combat Page set\n on another die of the target \n dmg: 20~39",
     " Light: 2 \n Single Use - Restore 6 Light;\n fully recover Stagger. Manifest\n the E.G.O. of the Red Mist next\n Scene. \n block: 8~15 \n evade: 8~15"};
   String[] egopages = {"Great Split: Horizontal", "Great Split: Vertical", "Manifest: E.G.O."};
-  int[] dice;
+  int dice;
   public Gebura(){
     hp = 120;
     stagger = 67;
@@ -42,11 +42,6 @@ public class Gebura{
     stagger-=damage;
     if(stagger<0)
       stagger = 0;
-  }
-  public void rollDice(){
-    for(int i=0;i<dice.length;i++){
-      dice[i]=(int)(random(5)+2);   
-    }
   }
   public void changeLight(int value){
     light+=value;

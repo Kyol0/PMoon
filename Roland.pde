@@ -13,7 +13,7 @@ public class Roland{
     " dmg: 4~8 \n dmg: 5~8 \n dmg: 7~12",
     " dmg: 5~9 \n dmg: 5~9",
     " On Clash win, destroy all of\n opponent's dice \n dmg: 20~39"};
-  int[] dice;
+  int dice;
   int phase;
   public Roland(){
     hp = 400;
@@ -35,10 +35,5 @@ public class Roland{
     stagger-=damage;
     if(stagger<0)
       stagger = 0;
-  }
-  public void rollDice(){
-    for(int i=0;i<dice.length;i++){
-      dice[i]=(int)(random(5)+2);   
-    }
   }
 }
