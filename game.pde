@@ -349,7 +349,7 @@ void draw(){
         }
       }
       else{
-      for(int i=0;i<hand.size();i++){
+        for(int i=0;i<hand.size();i++){
         PImage page;
         if(hand.get(i)==0){
          fill(146, 200, 139);
@@ -480,7 +480,8 @@ void draw(){
             rPages = loadImage("roland/Old Boys Workshop.png"); 
           }
           
-
+          //show selected cards
+          for(int r=0; r<)
           
           //hover over black silence cards
           if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
@@ -815,34 +816,19 @@ void mouseClicked(){
     }
   }
 
-  //select pages in hand
   else if(turn){
+
+    //select pages in hand
     for(int r=0;r<hand.size();r++){
       if(mouseX>width/4*3-105*(r+1)&&mouseX<width/4*3-105*(r+1)+100&&mouseY>height-125&&mouseY<height){
-        if(hand.get(r)==0){
-
-        }
-        else if(hand.get(r)==1){
-
-        }
-        else if(hand.get(r)==2){
-
-        }
-        else if(hand.get(r)==3){
-
-        }
-        else if(hand.get(r)==4){
-
-        }
-        else if(hand.get(r)==5){
-
-        }
-        else if(hand.get(r)==6){
-
-        }
-        else if(hand.get(r)==7){
-
-        }
+        selected.add(hand.remove(r));
+      }
+    }
+    
+    //deselect pages from selected
+    for(int r=0;r<selected.size();s++){
+      if(mouseX){
+        hand.add(selected.remove(r));
       }
     }
   }
