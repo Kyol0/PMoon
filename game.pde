@@ -457,8 +457,81 @@ void draw(){
           fill(0);
           text("E.G.O \nPages", width-70,height-50);
         }
+      
+          //show selected cards
+        for(int r=0; r<selected.size();r++){
+          PImage selection;
+          if(selected.get(r)==0){
+            selection = loadImage("kali/CardUpstandingSlashArt.png");
+          }
+          else if(selected.get(r)==1){
+            selection = loadImage("kali/CardSpearArt.png");
+          }
+          else if(selected.get(r)==2){
+            selection = loadImage("kali/CardLevelSlashArt.png");
+          }
+          else if(selected.get(r)==3){
+            selection = loadImage("kali/CardFocusSpiritArt.png");
+          }
+          else if(selected.get(r)==4){
+            selection = loadImage("kali/CardOnrushArt.png");
+          }
+          else if(selected.get(r)==5){ // Greater Split Horizontal
+            selection = loadImage("kali/CardManifestEgoArt.png"); 
+          }
+          else if(selected.get(r)==6){ 
+            selection = loadImage("kali/CardGreaterSplitVerticalArt.png");
+          }
+          else{  //Manifest Ego
+            selection = loadImage("kali/CardManifestEgoArt.png"); 
+          }
+          if(mouseX>600+r*55&&mouseX<600+r*55+50&&mouseY>300&&mouseY<338){
+            stroke(255,255,0);
+            rect(600+r*55,300,50,38);
+            stroke(0);
+            
+            if(selected.get(r)==0){
+            fill(146, 200, 139);
+            }
+            else if(selected.get(r)==1){
+              fill(146, 200, 139);
+            }
+            else if(selected.get(r)==2){
+              fill(146, 200, 139);
+            }
+            else if(selected.get(r)==3){
+              fill(95, 139, 227);
+            }
+            else if(selected.get(r)==4){
+              fill(124, 62, 219);
+            }
+            else if(selected.get(r)==5){
+              fill(124, 34, 60);
+            }
+            else if(selected.get(r)==6){ //Horizontal
+              fill(124, 34, 60);
+            }
+            else{  //Ego
+              fill(234, 205, 1);
+            }
+            rect(width-210,210,210,330);
+            textSize(15);
+            fill(0);
+            if(selected.get(r)<=4){
+              text(player.pages[selected.get(r)],width-200,235);
+            }
+            else{
+              text(player.egopages[selected.get(r)-5],width-200,235);
+            }
+            text(player.pagedesc[selected.get(r)],width-200,410);
+            image(selection,width-210,240,210,159);
+          }
+          image(selection,600+r*55,300,50,38);
+        }
       }  
       stroke(0);
+
+       
       
       //black silence cards used
       if(scene%4 ==1){
@@ -479,10 +552,7 @@ void draw(){
           else{
             rPages = loadImage("roland/Old Boys Workshop.png"); 
           }
-          
-          //show selected cards
-          for(int r=0; r<)
-          
+
           //hover over black silence cards
           if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
            stroke(255,255,0);
@@ -821,13 +891,85 @@ void mouseClicked(){
     //select pages in hand
     for(int r=0;r<hand.size();r++){
       if(mouseX>width/4*3-105*(r+1)&&mouseX<width/4*3-105*(r+1)+100&&mouseY>height-125&&mouseY<height){
-        selected.add(hand.remove(r));
+        if(hand.get(r)==0){
+          if(player.light>=1){
+            selected.add(hand.remove(r));
+            player.light-=1;
+          }
+        }
+        else if(hand.get(r)==1){
+          if(player.light>=1){
+            selected.add(hand.remove(r));
+            player.light-=1;
+          }
+        }
+        else if(hand.get(r)==2){
+          if(player.light>=1){
+            selected.add(hand.remove(r));
+            player.light-=1;
+          }
+        }
+        else if(hand.get(r)==3){
+          if(player.light>=2){
+            selected.add(hand.remove(r));
+            player.light-=2;
+          }
+        }
+        else if(hand.get(r)==4){
+          if(player.light>=3){
+            selected.add(hand.remove(r));
+            player.light-=3;
+          }
+        }
+        else if(hand.get(r)==5){
+          if(player.light>=6){
+            selected.add(hand.remove(r));
+            player.light-=6;
+          }
+        }
+        else if(hand.get(r)==6){
+          if(player.light>=5){
+            selected.add(hand.remove(r));
+            player.light-=5;
+          }
+        }
+        else if(hand.get(r)==7){
+          if(player.light>=2){
+            selected.add(hand.remove(r));
+            player.light-=2;
+          }
+        }
       }
+      println(selected);
     }
     
     //deselect pages from selected
-    for(int r=0;r<selected.size();s++){
-      if(mouseX){
+    for(int r=0;r<selected.size();r++){
+      if(mouseX>600+r*55&&mouseX<600+r*55+50&&mouseY>300&&mouseY<338){
+        if(selected.get(r)==0){
+          player.light+=1;
+        }
+        else if(selected.get(r)==1){
+          player.light+=1;
+        }
+        else if(selected.get(r)==2){
+          player.light+=1;
+        }
+        else if(selected.get(r)==3){
+          player.light+=2;
+        }
+        else if(selected.get(r)==4){
+          player.light+=3;
+        }
+        else if(selected.get(r)==5){
+          player.light+=6;
+        }
+        else if(selected.get(r)==6){
+          player.light+=5;
+        }
+        else if(selected.get(r)==7){
+          player.light+=2;
+        }
         hand.add(selected.remove(r));
       }
     }
