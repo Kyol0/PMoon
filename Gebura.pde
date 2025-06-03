@@ -25,7 +25,7 @@ public class Gebura{
     emotionlvl = 0;
     maxLight = 4;
     light = maxLight;
-    egoCount = 9;
+    egoCount = 0;
   }
   public void recoverHP(int value){
     hp+=value;

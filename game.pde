@@ -29,8 +29,14 @@ int scene; //current turn
 boolean spear; //checks if spear passive is active
 boolean level; //checks if level slash passive is active
 boolean upstand; //checks if upstanding slash passive is active 
+boolean allasPassive; //checks if allas Workshop passive is active
+boolean wheelsPassive; //checks if wheels industry passive is active
 int pAtk; // number of attacks in a certain card for player
 int eAtk; // number of attacks in a page for roland
+int currentPage; //current attack for player
+int enemyPage; //current attack for enemy
+int rx; //location on the screen of the enemy
+int gx; // location on the screen of player
 void setup(){
   size(1152,648);
   corner = new PVector(width,height);
@@ -39,6 +45,7 @@ void setup(){
   //enemy setup
   enemy = new Roland();
   Rsprite = loadImage("roland/rolandidle.png");
+  rx = 300;
   
   //player setup
   player = new Gebura();
@@ -49,6 +56,7 @@ void setup(){
   hand.add((int)random(5));
   dupeCheck((int)random(5));
   scene = 1;
+  gx = 700;
   
   
   
@@ -129,7 +137,7 @@ void draw(){
     }
     fill(255,255,0);
     circle(width/2,0,100);
-    fill(42, 222, 114);
+    fill(52, 168, 235);
     quad(width/2,0,width/2+10,25,width/2,70,width/2-10,25);
     shape(transition,i,0);
     if(i>=width){
@@ -145,8 +153,6 @@ void draw(){
     
     //makes sure the background is constantly being refreshed with the display board to show health and other stats
     image(background,0,0,1152,648);
-    image(Gsprite,700,340,122.4,142.6);
-    image(Rsprite,300,340,35.2,99.6);
     fill(0);
     rect(0,0,200,200);
     fill(255);
@@ -193,6 +199,8 @@ void draw(){
     
     //if it is draw phase, draws cards randomly based on how many cards will be in your hand
     if(draw){
+      image(Gsprite,700,340,122.4,142.6);
+      image(Rsprite,300,340,35.2,99.6);
       if(!drawn){
         dupeCheck((int)random(5));
         drawn=true;
@@ -256,12 +264,126 @@ void draw(){
     //if it is attack phase, uses the cards selected and compare the values of kalis and rolands
     if(animate){
       println("attack phase");
-      
+      SoundFile snap = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
+      SoundFile roll = new SoundFile(this,"other_sfx/Dice_Roll.wav");
+      if(pAtk <= 0&&eAtk<=0){
+        if(selected.size()>0){
+          currentPage = selected.remove(0);
+          if(currentPage==0){
+            pAtk = 2;
+          }
+          else if(currentPage==1){
+            pAtk=3;
+          }
+          else if(currentPage==2){
+            pAtk = 2;
+          }
+          else if(currentPage==3){
+            pAtk = 2;
+          }
+          else if(currentPage==4){
+            pAtk = 1;
+          }
+          else if(currentPage==5){
+            pAtk = 1;
+          }
+          else if(currentPage == 6){
+            pAtk = 1;
+          }
+          else if (currentPage==7){
+            pAtk =2;
+          }
+        }
+        if(eSelected.size()>0){
+          enemyPage = eSelected.remove(0);
+          if(enemyPage==0){
+            eAtk = 2;
+          }
+          else if(enemyPage==1){
+            eAtk=2;
+          }
+          else if(enemyPage==2){
+            eAtk = 2;
+          }
+          else if(enemyPage==3){
+            eAtk = 2;
+          }
+          else if(enemyPage==4){
+            eAtk = 1;
+          }
+          else if(enemyPage==5){
+            eAtk = 3;
+          }
+          else if(enemyPage == 6){
+            eAtk = 4;
+          }
+          else if (enemyPage==7){
+            eAtk =3;
+          }
+          else if(enemyPage == 8){
+            eAtk = 2;
+          }
+          else if(enemyPage ==9){
+            eAtk=1;
+          }
+        }
+      }
+      if(enemyPage==7){
+        SoundFile logic = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+        PImage pageImage = loadImage("roland/Atelier Logic.png");
+        fill(0);
+        rect(rx,280,90,58);
+        fill(255);
+        textSize(10);
+        text(enemy.pages[7],rx+2,288);
+        image(pageImage,rx,300,50,38);
+        int Rdmg;
+        if(eAtk == 3){
+          Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+          logic.play();
+          Rdmg = (int)(random(4)+4);
+          image(Rsprite,rx,340,151,99);
+          delay(500);
+          eAtk--;
+        }
+        else if(eAtk ==2){
+          Rsprite = loadImage("roland/BlackSilenceCombatSpecial2.png");
+          logic.play();
+          image(Rsprite,rx,340,151,99);
+          Rdmg = (int)(random(3)+5);
+          delay(500);
+          eAtk--;
+        }
+        else if(eAtk == 1){
+          Rsprite = loadImage("roland/BlackSilenceCombatSpecial11.png");
+          logic = new SoundFile(this,"black_silence_sfx/Roland_Shotgun.wav");
+          logic.play();
+          image(Rsprite,rx,340,203,97);
+          Rdmg = (int)(random(4)+5);
+          delay(500);
+          eAtk--;
+        }
+        if()
+      }
+      else{
+
+      }
+      if(selected.size()==0 && eSelected.size()==0){
+        animate = false;
+        draw = true;
+        drawn = false;
+        scene++;
+        player.changeLight(1);
+        Rsprite = loadImage("roland/rolandidle.png");
+        Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
+        snap.play();
+      }
     }
     
     //if it is the selection phase, lets the player select cards and compare them through hovering over the cards
     if(turn){
-      
+      image(Gsprite,700,340,122.4,142.6);
+      image(Rsprite,300,340,35.2,99.6);
       while(eSelected.size()>0){
         eSelected.remove(0);
       }
@@ -1009,7 +1131,7 @@ void mouseClicked(){
     if(turn &&mousepos.sub(button).mag()<=50){
       turn = false;
       animate = true;
-      SoundFile start = new SoundFile(this, "Finger_Snapping.wav");
+      SoundFile start = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
       start.play();
     }
 }
