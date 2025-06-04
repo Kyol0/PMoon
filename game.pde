@@ -278,7 +278,6 @@ void draw(){
       
       SoundFile snap = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
       SoundFile roll = new SoundFile(this,"other_sfx/Dice_Roll.wav");
-     
         if(pAtk <= 0&&eAtk<=0){
           if(selected.size()>0){
             currentPage = selected.remove(0);
@@ -340,6 +339,7 @@ void draw(){
               eAtk=1;
             }
           }
+          
         }
         else if(enemyPage==7){
           SoundFile logic = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
@@ -396,28 +396,28 @@ void draw(){
           }
 
           image(myImage,gx+40,300,50,38);
-          if(currentPage==0){
+          if(currentPage==0&&eAtk == 0){
             pAtk = 2;
           }
-          else if(currentPage==1){
+          else if(currentPage==1&&eAtk == 0){
             pAtk=3;
           }
-          else if(currentPage==2){
+          else if(currentPage==2&&eAtk == 0){
             pAtk = 2;
           }
-          else if(currentPage==3){
+          else if(currentPage==3&&eAtk == 0){
             pAtk = 2;
           }
-          else if(currentPage==4){
+          else if(currentPage==4&&eAtk == 0){
             pAtk = 1;
           }
-          else if(currentPage==5){
+          else if(currentPage==5&&eAtk == 0){
             pAtk = 1;
           }
-          else if(currentPage == 6){
+          else if(currentPage == 6&&eAtk == 0){
             pAtk = 1;
           }
-          else{
+          else if(currentPage == 7&&eAtk == 0){
             pAtk =2;
           }
           
@@ -442,11 +442,11 @@ void draw(){
                 mist = new SoundFile(this,"other_sfx/clash.wav");
                 mist.play();
                 if(EgoOn){
+                  gx-=2;
                   Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                   Gfx = loadImage("kali/upstanding.png");
                   image(Gsprite,gx-90,330,211,150);
                   image(Gfx,gx-140,250,275,275);
-
                 }
                 else{
 
@@ -459,6 +459,9 @@ void draw(){
                 else{
 
                 }
+                gx+=2;
+                player.damaged(Rdmg);
+                image(Gsprite,gx,340,97,89);
               }
               pAtk--;
             }
