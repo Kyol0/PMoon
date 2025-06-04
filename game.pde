@@ -37,6 +37,7 @@ int currentPage; //current attack for player
 int enemyPage; //current attack for enemy
 int rx; //location on the screen of the enemy
 int gx; // location on the screen of player
+boolean pause; //split second of peace in atk
 void setup(){
   size(1152,648);
   corner = new PVector(width,height);
@@ -57,6 +58,7 @@ void setup(){
   dupeCheck((int)random(5));
   scene = 1;
   gx = 700;
+  pause = false;
   
   
   
@@ -108,7 +110,12 @@ void draw(){
       }
     }
     image(background,0,0,1152,648);
-    image(Gsprite,700,340,122.4,142.6);
+    if(EgoOn){
+      image(Gsprite,700,340,187,100);
+    }
+    else{
+      image(Gsprite,700,340,122.4,142.6);
+    }
     image(Rsprite,300,340,35.2,99.6);
     fill(0);
     rect(0,0,200,200);
@@ -199,7 +206,12 @@ void draw(){
     
     //if it is draw phase, draws cards randomly based on how many cards will be in your hand
     if(draw){
-      image(Gsprite,700,340,122.4,142.6);
+      if(EgoOn){
+        image(Gsprite,700,340,187,100);
+      }
+      else{
+        image(Gsprite,700,340,122.4,142.6);
+      }
       image(Rsprite,300,340,35.2,99.6);
       if(!drawn){
         dupeCheck((int)random(5));
@@ -263,12 +275,127 @@ void draw(){
     
     //if it is attack phase, uses the cards selected and compare the values of kalis and rolands
     if(animate){
-      println("attack phase");
+      
       SoundFile snap = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
       SoundFile roll = new SoundFile(this,"other_sfx/Dice_Roll.wav");
-      if(pAtk <= 0&&eAtk<=0){
-        if(selected.size()>0){
-          currentPage = selected.remove(0);
+     
+        if(pAtk <= 0&&eAtk<=0){
+          if(selected.size()>0){
+            currentPage = selected.remove(0);
+            if(currentPage==0){
+              pAtk = 2;
+            }
+            else if(currentPage==1){
+              pAtk=3;
+            }
+            else if(currentPage==2){
+              pAtk = 2;
+            }
+            else if(currentPage==3){
+              pAtk = 2;
+            }
+            else if(currentPage==4){
+              pAtk = 1;
+            }
+            else if(currentPage==5){
+              pAtk = 1;
+            }
+            else if(currentPage == 6){
+              pAtk = 1;
+            }
+            else if (currentPage==7){
+              pAtk =2;
+            }
+          }
+          if(eSelected.size()>0){
+            enemyPage = eSelected.remove(0);
+            if(enemyPage==0){
+              eAtk = 2;
+            }
+            else if(enemyPage==1){
+              eAtk=2;
+            }
+            else if(enemyPage==2){
+              eAtk = 2;
+            }
+            else if(enemyPage==3){
+              eAtk = 2;
+            }
+            else if(enemyPage==4){
+              eAtk = 1;
+            }
+            else if(enemyPage==5){
+              eAtk = 3;
+            }
+            else if(enemyPage == 6){
+              eAtk = 4;
+            }
+            else if (enemyPage==7){
+              eAtk =3;
+            }
+            else if(enemyPage == 8){
+              eAtk = 2;
+            }
+            else if(enemyPage ==9){
+              eAtk=1;
+            }
+          }
+        }
+        else if(enemyPage==7){
+          SoundFile logic = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+          PImage pageImage = loadImage("roland/Atelier Logic.png");
+          fill(0);
+          rect(rx,280,90,58);
+          fill(255);
+          textSize(10);
+          text(enemy.pages[7],rx+2,288);
+          image(pageImage,rx,300,50,38);
+          int Rdmg = 0;
+          int Gdmg;
+          if(pause){
+            Rsprite = loadImage("roland/BlackSilenceCombatMove.png");
+            image(Rsprite,rx-30,360,136,80);
+          }
+          else if(eAtk == 3){
+            Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+            logic.play();
+            Rdmg = (int)(random(4)+4);
+            image(Rsprite,rx,340,151,99);
+            eAtk--;
+          }
+          else if(eAtk ==2){
+            Rsprite = loadImage("roland/BlackSilenceCombatSpecial2.png");
+            logic.play();
+            image(Rsprite,rx,340,151,99);
+            Rdmg = (int)(random(3)+5);
+            eAtk--;
+          }
+          else if(eAtk == 1){
+            Rsprite = loadImage("roland/BlackSilenceCombatSpecial11.png");
+            logic = new SoundFile(this,"black_silence_sfx/Roland_Shotgun.wav");
+            logic.play();
+            image(Rsprite,rx,340,203,97);
+            Rdmg = (int)(random(4)+5);
+            eAtk--;
+          }
+          fill(255);
+          textSize(20);
+          text(Rdmg,rx+60,330);
+          SoundFile mist;
+          PImage myImage;
+          fill(0);
+          rect(gx,280,90,58);
+          fill(255);
+          textSize(10);
+          text(player.pages[0],gx+2,288);
+          if(currentPage==0){
+            myImage = loadImage("kali/CardUpstandingSlashArt.png");
+          }
+          else{
+            myImage = loadImage("kali/CardManifestEgoArt.png");
+          }
+
+          image(myImage,gx+40,300,50,38);
           if(currentPage==0){
             pAtk = 2;
           }
@@ -290,99 +417,87 @@ void draw(){
           else if(currentPage == 6){
             pAtk = 1;
           }
-          else if (currentPage==7){
+          else{
             pAtk =2;
           }
-        }
-        if(eSelected.size()>0){
-          enemyPage = eSelected.remove(0);
-          if(enemyPage==0){
-            eAtk = 2;
+          
+          if(pause){
+            if(EgoOn){
+              Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
+            }
+            else{
+              Gsprite = loadImage("kali/Kali-combat-sprite-move.png");
+            }
+            image(Gsprite,gx,350,164,97);
+            pause = false;
           }
-          else if(enemyPage==1){
-            eAtk=2;
-          }
-          else if(enemyPage==2){
-            eAtk = 2;
-          }
-          else if(enemyPage==3){
-            eAtk = 2;
-          }
-          else if(enemyPage==4){
-            eAtk = 1;
-          }
-          else if(enemyPage==5){
-            eAtk = 3;
-          }
-          else if(enemyPage == 6){
-            eAtk = 4;
-          }
-          else if (enemyPage==7){
-            eAtk =3;
-          }
-          else if(enemyPage == 8){
-            eAtk = 2;
-          }
-          else if(enemyPage ==9){
-            eAtk=1;
-          }
-        }
-      }
-      if(enemyPage==7){
-        SoundFile logic = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
-        PImage pageImage = loadImage("roland/Atelier Logic.png");
-        fill(0);
-        rect(rx,280,90,58);
-        fill(255);
-        textSize(10);
-        text(enemy.pages[7],rx+2,288);
-        image(pageImage,rx,300,50,38);
-        int Rdmg;
-        if(eAtk == 3){
-          Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
-          logic.play();
-          Rdmg = (int)(random(4)+4);
-          image(Rsprite,rx,340,151,99);
-          delay(500);
-          eAtk--;
-        }
-        else if(eAtk ==2){
-          Rsprite = loadImage("roland/BlackSilenceCombatSpecial2.png");
-          logic.play();
-          image(Rsprite,rx,340,151,99);
-          Rdmg = (int)(random(3)+5);
-          delay(500);
-          eAtk--;
-        }
-        else if(eAtk == 1){
-          Rsprite = loadImage("roland/BlackSilenceCombatSpecial11.png");
-          logic = new SoundFile(this,"black_silence_sfx/Roland_Shotgun.wav");
-          logic.play();
-          image(Rsprite,rx,340,203,97);
-          Rdmg = (int)(random(4)+5);
-          delay(500);
-          eAtk--;
-        }
-        if()
-      }
-      else{
+          else if(currentPage==0){
+            pause = true;
+            myImage = loadImage("kali/CardUpstandingSlashArt.png");
+            if(pAtk ==2){
+              Gdmg = (int)(random(4)+6);
+              textSize(20);
+              text(Gdmg,gx+20,335);
+              if(Gdmg>=Rdmg){
+                mist = new SoundFile(this,"other_sfx/clash.wav");
+                mist.play();
+                if(EgoOn){
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                  Gfx = loadImage("kali/upstanding.png");
+                  image(Gsprite,gx-90,330,211,150);
+                  image(Gfx,gx-140,250,275,275);
 
-      }
-      if(selected.size()==0 && eSelected.size()==0){
-        animate = false;
-        draw = true;
-        drawn = false;
-        scene++;
-        player.changeLight(1);
-        Rsprite = loadImage("roland/rolandidle.png");
-        Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
-        snap.play();
-      }
+                }
+                else{
+
+                }
+              }
+              else{
+                if(EgoOn){
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                }
+                else{
+
+                }
+              }
+              pAtk--;
+            }
+            else if(pAtk ==1){
+              Gdmg = (int)(random(3)+6);
+              pAtk--;
+            }
+          }
+          delay(250);
+        }
+        else{
+
+        }
+        if(selected.size()==0 && eSelected.size()==0){
+          animate = false;
+          draw = true;
+          drawn = false;
+          scene++;
+          player.changeLight(1);
+          Rsprite = loadImage("roland/rolandidle.png");
+          if(EgoOn){
+            Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
+          }
+          else{
+            Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
+          }
+          snap.play();
+        }
+      
     }
     
     //if it is the selection phase, lets the player select cards and compare them through hovering over the cards
     if(turn){
-      image(Gsprite,700,340,122.4,142.6);
+      if(EgoOn){
+        image(Gsprite,700,340,187,100);
+      }
+      else{
+        image(Gsprite,700,340,122.4,142.6);
+      }
       image(Rsprite,300,340,35.2,99.6);
       while(eSelected.size()>0){
         eSelected.remove(0);
@@ -938,7 +1053,12 @@ void draw(){
       transition.setFill(0);
       if(i<height){
         image(background,0,0,1152,648);
-        image(Gsprite,700,340,122.4,142.6);
+        if(EgoOn){
+          image(Gsprite,700,340,187,100);
+        }
+        else{
+          image(Gsprite,700,340,122.4,142.6);
+        }
         image(Rsprite,300,360,136.5,83.4);
         shape(transition,0,i-648);
         i+=200;
@@ -1146,8 +1266,16 @@ void keyPressed(){
     player.damaged(1000);
   if(key=='s')
     scene++;
-  if(key=='m')
-    EgoOn = true;
+  if(key=='m'){
+    if(!EgoOn){
+      EgoOn = true;
+      Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
+    }
+    else{
+      EgoOn = false;
+      Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
+    }
+  }
 }
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
 void dupeCheck(int i){
