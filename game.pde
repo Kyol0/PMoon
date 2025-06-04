@@ -278,6 +278,9 @@ void draw(){
       
       SoundFile snap = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
       SoundFile roll = new SoundFile(this,"other_sfx/Dice_Roll.wav");
+      println("patk: " + pAtk);
+      println("eatk: " + eAtk);
+      println("");
         if(pAtk <= 0&&eAtk<=0){
           if(selected.size()>0){
             currentPage = selected.remove(0);
@@ -305,6 +308,9 @@ void draw(){
             else if (currentPage==7){
               pAtk =2;
             }
+          }
+          else{
+            currentPage =-1; 
           }
           if(eSelected.size()>0){
             enemyPage = eSelected.remove(0);
@@ -339,7 +345,17 @@ void draw(){
               eAtk=1;
             }
           }
-          
+          else{
+            enemyPage =-1; 
+          }
+          if(enemyPage>=0)
+          println("e: " + enemy.pages[enemyPage]);
+          else
+          println("e: " + enemyPage);
+          if(currentPage>=0)
+          println("p: " + player.pages[currentPage]);
+          else
+          println("p: " + currentPage);
         }
         else if(enemyPage==7){
           SoundFile logic = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
@@ -396,31 +412,6 @@ void draw(){
           }
 
           image(myImage,gx+40,300,50,38);
-          if(currentPage==0&&eAtk == 0){
-            pAtk = 2;
-          }
-          else if(currentPage==1&&eAtk == 0){
-            pAtk=3;
-          }
-          else if(currentPage==2&&eAtk == 0){
-            pAtk = 2;
-          }
-          else if(currentPage==3&&eAtk == 0){
-            pAtk = 2;
-          }
-          else if(currentPage==4&&eAtk == 0){
-            pAtk = 1;
-          }
-          else if(currentPage==5&&eAtk == 0){
-            pAtk = 1;
-          }
-          else if(currentPage == 6&&eAtk == 0){
-            pAtk = 1;
-          }
-          else if(currentPage == 7&&eAtk == 0){
-            pAtk =2;
-          }
-          
           if(pause){
             if(EgoOn){
               Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
@@ -466,14 +457,54 @@ void draw(){
               pAtk--;
             }
             else if(pAtk ==1){
-              Gdmg = (int)(random(3)+6);
+              Gdmg = (int)(random(4)+6);
+              textSize(20);
+              text(Gdmg,gx+20,335);
+              if(Gdmg>=Rdmg){
+                mist = new SoundFile(this,"other_sfx/clash.wav");
+                mist.play();
+                if(EgoOn){
+                  gx-=2;
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                  Gfx = loadImage("kali/upstanding.png");
+                  image(Gsprite,gx-90,330,211,150);
+                  image(Gfx,gx-140,250,275,275);
+                }
+                else{
+
+                }
+              }
+              else{
+                if(EgoOn){
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                }
+                else{
+
+                }
+                gx+=2;
+                player.damaged(Rdmg);
+                image(Gsprite,gx,340,97,89);
+              }
               pAtk--;
+            }
+            else{
+              if(EgoOn){
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                }
+                else{
+
+                }
+                gx+=2;
+                player.damaged(Rdmg);
+                image(Gsprite,gx,340,97,89);
+                println("this is where it ends");
+                delay(1000);
             }
           }
           delay(250);
         }
         else{
-
+          
         }
         if(selected.size()==0 && eSelected.size()==0){
           animate = false;
@@ -1045,6 +1076,11 @@ void draw(){
     //checks if Roland is dead or is moving to next phase
     if(enemy.hp<=0&&enemy.phase!=4){
       enemy.phase++;
+      animate = false;
+      while(selected.size()>0)
+        selected.remove(0);
+      while(eSelected.size()>0)
+        eSelected.remove(0);
       phasechange=true;
       bgm.pause();
     }
