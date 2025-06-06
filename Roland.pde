@@ -1,6 +1,7 @@
 public class Roland{
   int hp;
   int stagger;
+  int maxStagger;
   String[] pages = {"Allas Workshop", "Wheels Industry", "Zelkova Workshop","Old Boys Workshop","Mook Workshop", "Ranga Workshop", "Crystal Atelier","Atelier Logic","Durandal","Furioso"};
   String[] pagedesc = {
     " On Clash: Reduce Power of all\n target's dice by 2 \n dmg: 5~9 \n dmg: 5~8",
@@ -18,6 +19,7 @@ public class Roland{
   public Roland(){
     hp = 400;
     stagger = 350;
+    maxStagger = stagger;
     phase = 1;
   }
   public void changeHP(int value){
