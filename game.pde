@@ -1581,6 +1581,8 @@ void draw(){
     
     //if it is the selection phase, lets the player select cards and compare them through hovering over the cards
     if(turn){
+      gx=700;
+      rx=300;
       if(qEgo){
         SoundFile ego = new SoundFile(this,"red_mist_sfx/Kali_Change.wav");
         EgoOn = true;
