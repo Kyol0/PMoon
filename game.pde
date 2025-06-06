@@ -290,8 +290,6 @@ void draw(){
     
     //if it is attack phase, uses the cards selected and compare the values of kalis and rolands
     if(animate){
-      delay(250);
-      //delay(1000);
       SoundFile snap = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
       SoundFile roll = new SoundFile(this,"other_sfx/Dice_Roll.wav");
       println("patk: " + pAtk);
@@ -366,8 +364,62 @@ void draw(){
           }
         }
 
+        //greater split horizontal
+        else if(currentPage == 5){
+          PImage pageImage;
+          if(enemyPage==0){
+            pageImage = loadImage("roland/Allas Workshop.png"); 
+          }
+          else if(enemyPage==1){
+            pageImage = loadImage("roland/Wheels Industry.png");
+          }
+          else if(enemyPage==2){
+            pageImage = loadImage("roland/Zelkova Workshop.png");
+          }
+          else if(enemyPage==3){
+            pageImage = loadImage("roland/Old Boys Workshop.png");
+          }
+          else if(enemyPage==4){
+            pageImage = loadImage("roland/Mook Workshop.png");
+          }
+          else if(enemyPage==5){
+            pageImage = loadImage("roland/Ranga Workshop.png");
+          }
+          else if(enemyPage==6){
+            pageImage = loadImage("roland/Crystal Atelier.png");
+          }
+          else if(enemyPage==7){
+            pageImage = loadImage("roland/Atelier Logic.png");
+          }
+          else if(enemyPage==8){
+            pageImage = loadImage("roland/DurandalPage.png");
+          }
+          else{
+            pageImage = loadImage("roland/Furioso.png");
+          }
+          fill(0);
+          rect(rx,280,90,58);
+          fill(255);
+          textSize(10);
+          text(enemy.pages[enemyPage],rx+2,288);
+          image(pageImage,rx,300,50,38);
+          int Rdmg = 0;
+          int Gdmg;
+          
+
+          if(gx-rx>100){
+            Rsprite = loadImage("roland/rolandidle.png");
+            image(Rsprite,rx,340,35.2,99.6);
+            Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
+            image(Gsprite,gx,350,164,95);
+            gx-=15;
+          }
+        }
+
         //atelier logic
         else if(enemyPage==7){
+          delay(250);
+          //delay(1000);
           SoundFile logic = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
           PImage pageImage = loadImage("roland/Atelier Logic.png");
           fill(0);
@@ -466,11 +518,12 @@ void draw(){
           if(pause){
             if(EgoOn){
               Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
+              image(Gsprite,gx,350,164,95);
             }
             else{
               Gsprite = loadImage("kali/Kali-combat-sprite-move.png");
+              image(Gsprite,gx,350,164,97);
             }
-            image(Gsprite,gx,350,164,97);
             pause = false;
           }
 
