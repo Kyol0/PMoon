@@ -314,7 +314,7 @@ void draw(){
               pAtk = 1;
             }
             else if(currentPage==5){
-              pAtk = 1;
+              pAtk = 3;
             }
             else if(currentPage == 6){
               pAtk = 1;
@@ -367,8 +367,10 @@ void draw(){
         //greater split horizontal
         else if(currentPage == 5){
           PImage pageImage;
+          int Rdmg = 0;
+          int Gdmg = 0;
           if(enemyPage==0){
-            pageImage = loadImage("roland/Allas Workshop.png"); 
+            pageImage = loadImage("roland/Allas Workshop.png");
           }
           else if(enemyPage==1){
             pageImage = loadImage("roland/Wheels Industry.png");
@@ -403,16 +405,58 @@ void draw(){
           textSize(10);
           text(enemy.pages[enemyPage],rx+2,288);
           image(pageImage,rx,300,50,38);
-          int Rdmg = 0;
-          int Gdmg;
+          text(Rdmg,rx+60,330);
+          fill(0);
+          rect(gx,280,90,58);
+          fill(255);
+          textSize(10);
+          text(player.egopages[currentPage-5],gx+2,288);
+          PImage myImage = loadImage("kali/CardManifestEgoArt.png");
+          image(myImage,gx+40,300,50,38);
           
+          text(Gdmg,gx+20,335);
 
           if(gx-rx>100){
             Rsprite = loadImage("roland/rolandidle.png");
             image(Rsprite,rx,340,35.2,99.6);
             Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
             image(Gsprite,gx,350,164,95);
-            gx-=15;
+            gx-=40;
+          }
+          else if(pAtk == 3){
+           if(enemyPage==0){
+              Rdmg = (int)(random(5)+5);
+            }
+            else if(enemyPage==1){
+              Rdmg = (int)(random(11)+14);
+            }
+            else if(enemyPage==2){
+              Rdmg = (int)(random(5)+4);
+            }
+            else if(enemyPage==3){
+              Rdmg = (int)(random(5)+5);
+            }
+            else if(enemyPage==4){
+              Rdmg = (int)(random(8)+8);
+            }
+            else if(enemyPage==5){
+              Rdmg = (int)(random(5)+3);
+            }
+            else if(enemyPage==6){
+              Rdmg = (int)(random(4)+8);
+            }
+            else if(enemyPage==7){
+              Rdmg = (int)(random(5)+4);
+            }
+            else if(enemyPage==8){
+              Rdmg = (int)(random(5)+5);
+            }
+            else{
+              Rdmg = (int)(random(20)+20);
+            }
+            Gdmg = (int)(random(15)+28);
+            PImage bg = loadImage("kali/background.png");
+            image(bg,0,0,2147,648);
           }
         }
 
