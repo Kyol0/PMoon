@@ -41,6 +41,10 @@ boolean pause; //split second of peace in atk
 boolean pstaggered; //checks for player is staggered
 boolean estaggered; //checks for enemy being staggered
 boolean qEgo; //checks if manifest ego has been used;
+int Gdmg; //dice roll for gebura
+int Rdmg; // dice roll for roland
+boolean rolled; // checks if rolled
+boolean onrush; // checks for onrush passive
 void setup(){
   size(1152,648);
   corner = new PVector(width,height);
@@ -170,6 +174,89 @@ void draw(){
       current= 0;
     }
     i+=200;
+  }
+  
+  //check if Gebura is dead
+  else if(player.hp<=0){
+    finished = true;
+    image(background,0,0,1152,648);
+    transition.setFill(0);
+    if(i<height){
+      image(background,0,0,1152,648);
+      shape(transition,0,i-648);
+      i+=200;
+    }
+    else if (i>=height){
+      shape(transition,0,0);
+      textSize(100);
+      fill(255,0,0);
+      text("DEFEAT",width/2-230,height/2);
+      fill(255);
+      rect(width/2-130,height*3/4-15,200,100);
+      textSize(50);
+      if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85){
+          fill(255,0,0);
+      }
+      else  
+        fill(100);
+      text("Retry",width/2-100,height*3/4+50);
+    }
+  }
+  
+  //checks if Roland is dead or is moving to next phase
+  else if(enemy.hp<=0&&enemy.phase!=4){
+    enemy.phase++;
+    animate = false;
+    while(selected.size()>0)
+      selected.remove(0);
+    while(eSelected.size()>0)
+      eSelected.remove(0);
+    phasechange=true;
+    bgm.pause();
+  }
+  
+  //roland is defeated
+  else if(enemy.hp<=0 && enemy.phase==4){
+    if(!finished){
+      delay(2000);
+    }
+    finished = true;
+    Rsprite=loadImage("roland/rolanddefeated.png");
+    if(EgoOn){
+      Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
+    }
+    else{
+      Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
+    }
+    transition.setFill(0);
+    if(i<height){
+      image(background,0,0,1152,648);
+      if(EgoOn){
+        image(Gsprite,700,340,187,100);
+      }
+      else{
+        image(Gsprite,700,340,122.4,142.6);
+      }
+      image(Rsprite,300,360,136.5,83.4);
+      shape(transition,0,i-648);
+      i+=200;
+    }
+    else if (i>=height){
+      shape(transition,0,0);
+      textSize(100);
+      fill(0,255,0);
+      text("VICTORY",width/2-230,height/2);
+      fill(255);
+      rect(width/2-130,height*3/4-15,200,100);
+      textSize(50);
+      if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85){
+          fill(255,0,0);
+      }
+      else  
+        fill(100);
+      text("Retry",width/2-100,height*3/4+50);
+    }  
+
   }  
   else{
     
@@ -231,6 +318,15 @@ void draw(){
       if(!drawn){
         dupeCheck((int)random(5));
         drawn=true;
+        if(upstand){
+          dupeCheck((int)random(5));
+        }
+        if(spear){
+          dupeCheck((int)random(5));
+        }
+        if(level){
+          player.changeLight(2);
+        }
       }
       for(int i=0;i<=current;i++){
         PImage page;
@@ -292,9 +388,6 @@ void draw(){
     if(animate){
       SoundFile snap = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
       SoundFile roll = new SoundFile(this,"other_sfx/Dice_Roll.wav");
-      println("patk: " + pAtk);
-      println("eatk: " + eAtk);
-      println("");
         if(pAtk <= 0&&eAtk<=0){
           if(selected.size()>0){
             currentPage = selected.remove(0);
@@ -317,7 +410,7 @@ void draw(){
               pAtk = 12;
             }
             else if(currentPage == 6){
-              pAtk = 1;
+              pAtk = 15;
             }
             else if (currentPage==7){
               pAtk =2;
@@ -367,6 +460,43 @@ void draw(){
         //greater split horizontal
         else if(currentPage == 5){
           PImage pageImage;
+          if(!rolled){
+            Gdmg = (int)(random(15)+28);
+            if(enemyPage==0){
+              Rdmg = (int)(random(5)+5);
+            }
+            else if(enemyPage==1){
+              Rdmg = (int)(random(11)+14);
+            }
+            else if(enemyPage==2){
+              Rdmg = (int)(random(5)+4);
+            }
+            else if(enemyPage==3){
+              Rdmg = (int)(random(5)+5);
+            }
+            else if(enemyPage==4){
+              Rdmg = (int)(random(8)+8);
+            }
+            else if(enemyPage==5){
+              Rdmg = (int)(random(5)+3);
+            }
+            else if(enemyPage==6){
+              Rdmg = (int)(random(4)+8);
+            }
+            else if(enemyPage==7){
+              Rdmg = (int)(random(5)+4);
+            }
+            else if(enemyPage==8){
+              Rdmg = (int)(random(5)+5);
+            }
+            else if(enemyPage==9){
+              Rdmg = (int)(random(20)+20);
+            }
+            else{
+              Rdmg= 0;
+            }
+            rolled = true;
+          }
           if(enemyPage==0){
             pageImage = loadImage("roland/Allas Workshop.png");
           }
@@ -394,15 +524,18 @@ void draw(){
           else if(enemyPage==8){
             pageImage = loadImage("roland/DurandalPage.png");
           }
-          else{
+          else {
             pageImage = loadImage("roland/Furioso.png");
           }
           fill(0);
           rect(rx,280,90,58);
           fill(255);
           textSize(10);
-          text(enemy.pages[enemyPage],rx+2,288);
-          image(pageImage,rx,300,50,38);
+          if(enemyPage!=-1){
+            text(enemy.pages[enemyPage],rx+2,288);
+            image(pageImage,rx,300,50,38);
+          }
+          
           
           fill(0);
           rect(gx,280,90,58);
@@ -420,8 +553,12 @@ void draw(){
             Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
             image(Gsprite,gx,350,164,95);
             gx-=40;
+            textSize(20);
+            text(Rdmg,rx+60,330);
+            text(Gdmg,gx+60,335);
           }
           else if(pAtk == 12){ 
+            delay(250);
             SoundFile mimieye = new SoundFile(this,"red_mist_sfx/Kali_Special_Hori_Eyeon.wav");
             SoundFile swing = new SoundFile(this,"red_mist_sfx/Kali_Special_Hori_Start.wav");
             swing.play();
@@ -503,38 +640,6 @@ void draw(){
             Gfx = loadImage("kali/horizontal.png");
             Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
             pAtk-=1;
-            int Gdmg = (int)(random(15)+28);
-            int Rdmg;
-            if(enemyPage==0){
-              Rdmg = (int)(random(5)+5);
-            }
-            else if(enemyPage==1){
-              Rdmg = (int)(random(11)+14);
-            }
-            else if(enemyPage==2){
-              Rdmg = (int)(random(5)+4);
-            }
-            else if(enemyPage==3){
-              Rdmg = (int)(random(5)+5);
-            }
-            else if(enemyPage==4){
-              Rdmg = (int)(random(8)+8);
-            }
-            else if(enemyPage==5){
-              Rdmg = (int)(random(5)+3);
-            }
-            else if(enemyPage==6){
-              Rdmg = (int)(random(4)+8);
-            }
-            else if(enemyPage==7){
-              Rdmg = (int)(random(5)+4);
-            }
-            else if(enemyPage==8){
-              Rdmg = (int)(random(5)+5);
-            }
-            else{
-              Rdmg = (int)(random(20)+20);
-            }
             SoundFile pain = new SoundFile(this,"red_mist_sfx/Kali_Special_Hori_Fin.wav");
             pain.play();
             textSize(20);
@@ -547,6 +652,7 @@ void draw(){
               enemy.damaged(Gdmg);
               enemy.staggerDamage(Gdmg);
               eAtk=0;
+              player.addEmotion(1);
             }
             else{
               currentPage = -1;
@@ -555,13 +661,14 @@ void draw(){
           else if(pAtk==1){
             delay(3000);
             pAtk-=1;
+            rolled = false;
+            pause = true;
           }
         }
 
         //atelier logic
         else if(enemyPage==7){
           delay(250);
-          //delay(1000);
           SoundFile logic = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
           PImage pageImage = loadImage("roland/Atelier Logic.png");
           fill(0);
@@ -570,8 +677,6 @@ void draw(){
           textSize(10);
           text(enemy.pages[7],rx+2,288);
           image(pageImage,rx,300,50,38);
-          int Rdmg = 0;
-          int Gdmg;
           if(pAtk>0&&!pause){
             snap.play();
             delay(300);
@@ -615,6 +720,7 @@ void draw(){
           textSize(20);
           text(Rdmg,rx+60,330);
           SoundFile mist;
+          
           PImage myImage;
           fill(0);
           rect(gx,280,90,58);
@@ -721,6 +827,7 @@ void draw(){
               pAtk--;
             }
             else if(pAtk ==1){
+              pause = true;
               Gdmg = (int)(random(4)+6);
               if(EgoOn){
                 Gdmg+=2;
@@ -881,6 +988,7 @@ void draw(){
               pAtk--;
             }
             else if(pAtk ==1){
+              pause = true;
               Gdmg = (int)(random(5)+3);
               if(EgoOn){
                 Gdmg+=2;
@@ -996,6 +1104,7 @@ void draw(){
               pAtk--;
             }
             else if(pAtk ==1){
+              pause = true;
               Gdmg = (int)(random(4)+5);
               if(EgoOn){
                 Gdmg+=2;
@@ -1107,6 +1216,7 @@ void draw(){
               pAtk--;
             }
             else if(pAtk ==1){
+              pause = true;
               Gdmg = (int)(random(3)+5);
               if(EgoOn){
                 Gdmg+=2;
@@ -1177,6 +1287,7 @@ void draw(){
             pause = true;
             myImage = loadImage("kali/CardOnrushArt.png");
             if(pAtk ==1){
+              pause = true;
               Gdmg = (int)(random(13)+14);
               if(EgoOn){
                 Gdmg+=2;
@@ -1247,9 +1358,13 @@ void draw(){
 
           //great split vertical
           else if(currentPage==6){
+            if(pAtk == 15){
+              pAtk=1;
+            }
             pause = true;
             myImage = loadImage("kali/CardGreaterSplitVerticalArt.png");
             if(pAtk ==1){
+              snap.play();
               Gdmg = (int)(random(20)+20);
               if(EgoOn){
                 Gdmg+=2;
@@ -1264,7 +1379,7 @@ void draw(){
                   Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-5.png");
                   image(Gsprite,gx-90,325,226,160);
                   Gfx = loadImage("kali/vertical.png");
-                  image(Gfx,gx-100,200,158,300);
+                  image(Gfx,gx-150,200,339,310);
                 }
                 else{
                   Gsprite = loadImage("kali/Kali-combat-sprite-attack-5.png");
@@ -1293,9 +1408,7 @@ void draw(){
                   }
                 }
               }
-              if(enemy.stagger!=0){
-                pAtk--;
-              }
+              pAtk--;
             }
             else{
               if(EgoOn){
@@ -1320,6 +1433,7 @@ void draw(){
 
           //manifest ego
           else if(currentPage==7){
+            qEgo = true;
             pause = true;
             myImage = loadImage("kali/CardManifestEgoArt.png");
             if(pAtk ==2){
@@ -1361,6 +1475,7 @@ void draw(){
               pAtk--;
             }
             else if(pAtk ==1){
+              pause = true;
               Gdmg = (int)(random(8)+8);
               if(EgoOn){
                 Gdmg+=2;
@@ -1460,6 +1575,8 @@ void draw(){
           rect(gx,280,90,58);
           fill(255);
           textSize(10);
+          SoundFile mist;
+          SoundFile silence;
           if(currentPage==0&&pAtk>0){
             text(player.pages[0],gx+2,288);
             myImage = loadImage("kali/CardUpstandingSlashArt.png");
@@ -1471,7 +1588,7 @@ void draw(){
             image(myImage,gx+40,300,50,38);
           }    
           else if(currentPage == 2&&pAtk>0){
-            text(player.pages[currentPage],gx+2,288);
+            text(player.pages[2],gx+2,288);
             myImage = loadImage("kali/CardLevelSlashArt.png");
             image(myImage,gx+40,300,50,38);
           }   
@@ -1529,39 +1646,1495 @@ void draw(){
           rect(rx,280,90,58);
           fill(255);
           textSize(10);
-          text(enemy.pages[enemyPage],rx+2,288);
-          image(pageImage,rx,300,50,38);
+          if(enemyPage!=-1){
+            text(enemy.pages[enemyPage],rx+2,288);
+            image(pageImage,rx,300,50,38);
+          }
 
           //approach 
           if(gx-rx>180){
-            Rsprite = loadImage("roland/BlackSilenceCombatMove.png");
-            image(Rsprite,rx-30,360,136,80);
-            if(EgoOn){
-              Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
-              image(Gsprite,gx,350,164,95);
+            Rdmg=0;
+            if(!estaggered){
+              Rsprite = loadImage("roland/BlackSilenceCombatMove.png");
+              image(Rsprite,rx-30,360,136,80);
+              rx+=20;
             }
             else{
-              Gsprite = loadImage("kali/Kali-combat-sprite-move.png");
-              image(Gsprite,gx,350,164,97);
+              Rsprite = loadImage("roland/rolandidle.png");
+              image(Rsprite,rx,340,35.2,99.6);
             }
-            gx-=20;
-            rx+=20;
+            if(!pstaggered){
+              if(EgoOn){
+                Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
+                image(Gsprite,gx,350,164,95);
+              }
+              else{
+                Gsprite = loadImage("kali/Kali-combat-sprite-move.png");
+                image(Gsprite,gx,350,164,97);
+              }
+              gx-=20;
+            }
+            else{
+              if(EgoOn){
+                Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
+                image(Gsprite,gx,340,187,100);
+              }
+              else{
+                Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
+                image(Gsprite,gx,340,122.4,142.6);
+              }
+            }
           }
+          
           else{
-            
+            if(currentPage!=6)
+              delay(250);
+            if(enemyPage==0)
+              delay(1000);
+            //they fight back
+            if(enemyPage!=0)
+            eAtk=0;
+            if(pause&&currentPage!=6){
+              if(EgoOn){
+                Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
+                image(Gsprite,gx,350,164,95);
+              }
+              else{
+                Gsprite = loadImage("kali/Kali-combat-sprite-move.png");
+                image(Gsprite,gx,350,164,97);
+              }
+              Rsprite = loadImage("roland/BlackSilenceCombatMove.png");
+              image(Rsprite,rx-30,360,136,80);
+              pause = false;
+            }
+
+            //upstanding slash
+            else if(currentPage==0){
+              snap.play();
+              
+              pause = true;
+              myImage = loadImage("kali/CardUpstandingSlashArt.png");
+              
+              if(pAtk ==2){
+                Gdmg = (int)(random(5)+6);
+                if(allasPassive)
+                  Gdmg-=2;
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+
+                //allas Workshop
+                if(enemyPage==0){
+                  allasPassive = true;
+                  if(eAtk==2){
+                    Rdmg = (int)(random(5)+5);
+                    textSize(20);
+                    text(Rdmg,rx+60,335);
+                    if(Rdmg>Gdmg){
+                      silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
+                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                      Rfx = loadImage("roland/allas.png");
+                      silence.play();
+                      image(Rsprite,rx+20,360,228,80);
+                      image(Rfx,rx+50,330,228,120);
+                      player.addEmotion(-1);
+                    }
+                    else if(Rdmg==Gdmg||(currentPage==3&&pAtk==2)||currentPage==7){
+                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                      image(Rsprite,rx+20,360,228,80);
+                    }
+                    else{
+                      Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                      image(Rsprite, rx+50,340,61,100);
+                    }
+                    eAtk--;
+                  }
+                  else if(eAtk==1){
+                    Rdmg = (int)(random(4)+5);
+                    textSize(20);
+                    text(Rdmg,rx+60,335);
+                    if(Rdmg>Gdmg){
+                      silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
+                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                      Rfx = loadImage("roland/allas.png");
+                      silence.play();
+                      image(Rsprite,rx+20,360,228,80);
+                      image(Rfx,rx+50,330,228,120);
+                      player.addEmotion(-1);
+                    }
+                    else if(Rdmg==Gdmg||(currentPage==3&&pAtk==2)||currentPage==7){
+                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                      image(Rsprite,rx,360,228,80);
+                    }
+                    else{
+                      Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                      image(Rsprite, rx+50,340,61,100);
+                    }
+                    eAtk--;
+                  }
+                }
+
+                println("pdmg:" + Gdmg);
+                println("edmg:" + Rdmg);
+                
+                if(Gdmg>Rdmg){
+                  
+                  if(Gdmg>=8)
+                    upstand = true;
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    Gfx = loadImage("kali/upstanding.png");
+                    image(Gsprite,gx-90,325,226,160);
+                    image(Gfx,gx-140,250,275,275);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Vert.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    Gfx = loadImage("kali/upstanding1.png");
+                    image(Gsprite, gx-10,330,193,137);
+                    image(Gfx,gx-150,140,420,420);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Vert.wav");
+                  }
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else if(pAtk ==1){
+                pause = true;
+                Gdmg = 3;//(int)(random(4)+6);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                
+                allasPassive=false;
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  if(Gdmg>=8)
+                    upstand = true;
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    Gfx = loadImage("kali/upstanding.png");
+                    image(Gsprite,gx-90,325,226,160);
+                    image(Gfx,gx-140,250,275,275);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Vert.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    Gfx = loadImage("kali/upstanding1.png");
+                    image(Gsprite,gx-10,330,193,137);
+                    image(Gfx,gx-140,150,420,420);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Vert.wav");
+                  }
+                  
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else{
+                if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+              }
+            }
+
+            //spear
+            else if(currentPage==1){
+              snap.play();
+              pause = true;
+              myImage = loadImage("kali/CardSpearArt.png");
+              if(pAtk ==3){
+                Gdmg = (int)(random(6)+3);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  if(Gdmg>=8)
+                    spear = true;
+                  
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    Gfx = loadImage("kali/spear.png");
+                    image(Gsprite,gx-200,350,391,94);
+                    image(Gfx,gx-180,367,327,80);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Stab.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    Gfx = loadImage("kali/spear.png");
+                    image(Gsprite,gx-180,350,227,94);
+                    image(Gfx,gx-140,367,327,80);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Stab.wav");
+                  }
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    image(Gsprite,gx-200,350,391,94);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    image(Gsprite,gx-180,350,227,94);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else if(pAtk ==2){
+                Gdmg = (int)(random(5)+3);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  if(Gdmg>=8)
+                    spear = true;
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    Gfx = loadImage("kali/spear.png");
+                    image(Gsprite,gx-200,350,391,94);
+                    image(Gfx,gx-180,367,327,80);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Stab.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    Gfx = loadImage("kali/spear.png");
+                    image(Gsprite, gx-150,350,227,94);
+                    image(Gfx,gx-150,367,327,80);
+
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Stab.wav");
+                  }
+                  
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    image(Gsprite,gx-200,350,391,94);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    image(Gsprite,gx-180,350,227,94);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else if(pAtk ==1){
+                pause = true;
+                Gdmg = (int)(random(5)+3);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                allasPassive=false;
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  if(Gdmg>=8)
+                    spear = true;
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    Gfx = loadImage("kali/spear.png");
+                    image(Gsprite,gx-200,350,391,94);
+                    image(Gfx,gx-180,367,327,80);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Stab.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    Gfx = loadImage("kali/spear.png");
+                    image(Gsprite,gx-150,350,227,94);
+                    image(Gfx,gx-150,367,327,80);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Stab.wav");
+                  }
+                  
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    image(Gsprite,gx-200,350,391,94);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    image(Gsprite,gx-180,350,227,94);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else{
+                if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+              }
+            }
+
+            //level slash
+            else if(currentPage==2){
+              snap.play();
+              pause = true;
+              myImage = loadImage("kali/CardLevelSlashArt.png");
+              if(pAtk ==2){
+                Gdmg = (int)(random(5)+5);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  if(Gdmg>=8)
+                    level = true;
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
+                    Gfx = loadImage("kali/level.png");
+                    image(Gsprite,gx-50,330,218,120);
+                    image(Gfx,gx-170,310,383,190);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Hori.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
+                    Gfx = loadImage("kali/horizontal.png");
+                    image(Gsprite, gx-10,325,156,120);
+                    image(Gfx,gx-180,300,355,210);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Hori.wav");
+                  }
+                  
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
+                    image(Gsprite,gx-50,330,218,120);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
+                    image(Gsprite, gx-10,325,156,120);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
+                    image(Gsprite,gx-50,330,218,120);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
+                    image(Gsprite, gx-10,325,156,120);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else if(pAtk ==1){
+                pause = true;
+                Gdmg = (int)(random(4)+5);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                allasPassive=false;
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  if(Gdmg>=8)
+                    level = true;
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
+                    Gfx = loadImage("kali/level.png");
+                    image(Gsprite,gx-50,330,218,120);
+                    image(Gfx,gx-170,310,383,190);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Hori.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
+                    Gfx = loadImage("kali/horizontal.png");
+                    image(Gsprite,gx-10,325,156,120);
+                    image(Gfx,gx-180,300,355,210);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Hori.wav");
+                  }
+                  
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
+                    image(Gsprite,gx-50,330,218,120);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
+                    image(Gsprite, gx-10,325,156,120);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
+                    image(Gsprite,gx-50,330,218,120);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
+                    image(Gsprite, gx-10,325,156,120);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else{
+                if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+              }
+            }
+
+            //focus spirit
+            else if(currentPage==3){
+              snap.play();
+              pause = true;
+              myImage = loadImage("kali/CardFocusSpiritArt.png");
+              if(pAtk ==2){
+                Gdmg = (int)(random(5)+8);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  mist = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                  mist.play();
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-block.png");
+                    image(Gsprite,gx-50,345,141,120);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-guard.png");
+                    image(Gsprite, gx,340,57,102);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg-Gdmg);
+                  player.staggerDamage(Rdmg-Gdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else if(pAtk ==1){
+                pause = true;
+                Gdmg = (int)(random(3)+5);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                allasPassive=false;
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    Gfx = loadImage("kali/upstanding.png");
+                    image(Gsprite,gx-90,325,226,160);
+                    image(Gfx,gx-140,250,275,275);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Vert.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    Gfx = loadImage("kali/upstanding1.png");
+                    image(Gsprite, gx-10,330,193,137);
+                    image(Gfx,gx-150,140,420,420);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Vert.wav");
+                  }
+                  
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else{
+                if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+              }
+            }
+
+            //onrush
+            else if(currentPage==4){
+              snap.play();
+              pause = true;
+              myImage = loadImage("kali/CardOnrushArt.png");
+              if(pAtk ==1){
+                pause = true;
+                Gdmg = (int)(random(13)+14);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                allasPassive=false;
+                textSize(20);
+                text(Gdmg,gx+15,335);
+                if(Gdmg>=Rdmg){
+                  
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                    Gfx = loadImage("kali/onrush.png");
+                    image(Gfx,gx-100,200,158,300);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_EGO_Vert.wav");
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    Gfx = loadImage("kali/upstanding1.png");
+                    image(Gsprite, gx-10,330,193,137);
+                    image(Gfx,gx-150,140,420,420);
+                    mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Vert.wav");
+                  }
+                  
+                  mist.play();
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                    enemy.staggerDamage(Gdmg-Rdmg);
+                  }
+                  else{
+                    enemy.damaged(Gdmg);
+                    enemy.staggerDamage(Gdmg);
+                  }
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                if(enemy.stagger==0&&onrush)
+                  onrush = false;
+                else if(enemy.stagger==0){
+                  onrush = true;
+                }
+                if(!onrush){
+                  pAtk--;
+                }
+              }
+              else{
+                if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+              }
+            }
+
+            //great split vertical
+            if(currentPage==6){
+              myImage = loadImage("kali/CardGreaterSplitVerticalArt.png");
+              if(pAtk == 15){
+                Gdmg = (int)(random(20)+20);
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                
+                allasPassive=false;
+                textSize(20);
+                text(Gdmg,gx+15,335);
+                if(Gdmg>=Rdmg){
+                  eAtk=0;
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Vert.wav");
+                  mist.play();
+                  image(Rsprite, rx+50,340,61,100);
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-1.png");
+                    image(Gsprite,gx-10,265,150,170);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-attack-1.png");
+                    image(Gsprite, gx-10,255,57,170);
+                  }
+                  pAtk--;
+                }
+                else{
+                  pAtk = 2;
+                }
+              }
+              else if(pAtk == 14){
+                delay(1250);
+                textSize(20);
+                text(Gdmg,gx+15,335);
+                image(Rsprite, rx+50,340,61,100);
+                mist = new SoundFile(this,"red_mist_sfx/Kali_Special_Vert_Hit.wav");
+                mist.play();
+                gx-=2;
+                if(EgoOn){
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-2.png");
+                  image(Gsprite,gx-100,330,253,110);
+                }
+                else{
+                  Gsprite = loadImage("kali/Kali-combat-sprite-attack-2.png");
+                  image(Gsprite, gx-100,330,153,95);
+                }
+                pAtk--;
+              }
+              else if(pAtk == 13){
+                delay(750);
+                textSize(20);
+                text(Gdmg,gx+15,335);
+                image(Rsprite, rx+50,340,61,100);
+                mist = new SoundFile(this,"red_mist_sfx/Kali_Special_Vert_Hit.wav");
+                mist.play();
+                gx-=2;
+                if(EgoOn){
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-3.png");
+                  image(Gsprite,gx-100,330,248,110);
+                }
+                else{
+                  Gsprite = loadImage("kali/Kali-combat-sprite-attack-3.png");
+                  image(Gsprite, gx-100,330,155,95);
+                }
+                pAtk--;
+              }
+              else if(pAtk == 12){
+                delay(750);
+                textSize(20);
+                text(Gdmg,gx+15,335);
+                image(Rsprite, rx+50,340,61,100);
+                mist = new SoundFile(this,"red_mist_sfx/Kali_Special_Vert_Hit.wav");
+                mist.play();
+                gx-=2;
+                if(EgoOn){
+                  Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-4.png");
+                  image(Gsprite,gx-100,340,251,95);
+                }
+                else{
+                  Gsprite = loadImage("kali/Kali-combat-sprite-attack-4.png");
+                  image(Gsprite, gx-100,330,159,95);
+                }
+                pAtk--;
+              }
+              else if(pAtk == 11){
+                delay(1250);
+                SoundFile slice = new SoundFile(this,"red_mist_sfx/Kali_Special_Cut.wav");
+                slice.play();
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame1.png");
+                image(slash,0,0,1152,648);
+                pAtk-=1;  
+              }
+              else if(pAtk == 10){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame2.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk == 9){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame3.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk == 8){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame4.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk == 7){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame5.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk == 6){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame6.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk == 5){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame7.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk == 4){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame8.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk == 3){
+                fill(0);
+                rect(0,0,width,height);
+                PImage slash = loadImage("kali/frame9.png");
+                image(slash,0,0,1152,2048);
+                pAtk-=1;
+              }
+              else if(pAtk ==2){
+                textSize(20);
+                text(Gdmg,gx+15,335);
+                if(Gdmg>Rdmg){
+                  image(Rsprite, rx+50,340,61,100);
+                  mist = new SoundFile(this,"red_mist_sfx/Kali_Special_Vert_Fin.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-5.png");
+                    image(Gsprite,gx-90,325,226,160);
+                    Gfx = loadImage("kali/vertical.png");
+                    image(Gfx,gx-150,240,339,310);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-attack-5.png");
+                    Gfx = loadImage("kali/vertical.png");
+                    image(Gsprite, gx-50,330,190,150);
+                    image(Gfx,gx-150,200,339,310);
+                  }
+                  if((enemyPage ==1&&eAtk==1)||(enemyPage==3&&eAtk==2)){
+                    enemy.damaged(Gdmg-Rdmg);
+                  }
+                  else 
+                    enemy.damaged(Gdmg);
+                  if(eSelected.size()>0)
+                    eSelected.remove(0);
+                  player.addEmotion(1);
+                  player.recoverHP(Gdmg);
+                }
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-5.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-attack-5.png");
+                    image(Gsprite, gx-50,330,190,150);
+                  }
+                }
+                else if(Gdmg==Rdmg){
+                  mist = new SoundFile(this,"other_sfx/clash.wav");
+                  mist.play();
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-5.png");
+                    image(Gsprite,gx-90,325,226,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-attack-5.png");
+                    image(Gsprite, gx-10,330,193,137);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else if(pAtk == 1){
+                if(Gdmg>Rdmg){
+                  delay(1250);
+                }
+                else
+                  delay(250);
+                pAtk--;
+              }
+              else{
+                if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+              }
+            }
+
+            //manifest ego
+            else if(currentPage==7){
+              snap.play();
+              qEgo = true;
+              pause = true;
+              myImage = loadImage("kali/CardManifestEgoArt.png");
+              if(pAtk ==2){
+                Gdmg = (int)(random(8)+8);
+                
+                if(allasPassive)
+                  Gdmg-=2;
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  mist = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                  mist.play();
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-block.png");
+                    image(Gsprite,gx-50,345,141,120);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-guard.png");
+                    image(Gsprite, gx,340,57,102);
+                  }
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg-Gdmg);
+                  player.staggerDamage(Rdmg-Gdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                pAtk--;
+              }
+              else if(pAtk ==1){
+                pause = true;
+                Gdmg = (int)(random(8)+8);
+                
+                if(allasPassive)
+                  Gdmg-=2;
+                if(EgoOn){
+                  Gdmg+=2;
+                }
+                allasPassive=false;
+                textSize(20);
+                text(Gdmg,gx+20,335);
+                if(Gdmg>=Rdmg){
+                  mist = new SoundFile(this,"other_sfx/Defense_Evasion.wav");
+                  mist.play();
+                  gx-=2;
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-evade.png");
+                    image(Gsprite,gx-50,325,243,160);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-evade.png");
+                    image(Gsprite,gx-10,335,135,110);
+                  }
+                  player.staggerDamage(-1*Gdmg);
+                }
+                else{
+                  if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+                }
+                if(Gdmg<=Rdmg||eAtk==0){
+                  pAtk--;
+                }
+              }
+              else{
+                if(EgoOn){
+                    Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,119,130);
+                  }
+                  else{
+                    Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                    image(Gsprite,gx,340,109,130);
+                  }
+                  gx+=2;
+                  player.damaged(Rdmg);
+                  player.staggerDamage(Rdmg);
+                  if(player.stagger==0){
+                    pAtk=0;
+                    while(selected.size()>0){
+                      selected.remove(0);
+                    }
+                  }
+              }
+            }
+
+            //no page
+            else if(currentPage==-1){
+              pause = true;
+              
+              if(EgoOn){
+                Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
+                image(Gsprite,gx,340,119,130);
+              }
+              else{
+                Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
+                image(Gsprite,gx,340,109,130);
+              }
+              gx+=2;
+              if(player.stagger==0){
+                pAtk=0;
+                while(selected.size()>0){
+                  selected.remove(0);
+                }
+                player.damaged(Rdmg*2);
+              }
+              else{
+                player.damaged(Rdmg);
+                player.staggerDamage(Rdmg);
+              }
+            }
           }
         }
-        if(selected.size()==0 && eSelected.size()==0){
+        if(currentPage==-1&&enemyPage==-1){
           animate = false;
           draw = true;
           drawn = false;
           scene++;
           eAtk=0;
           pAtk = 0;
+          if(player.stagger ==0){
+            if(!pstaggered)
+              pstaggered = true;
+          }
           if(!pstaggered)
             player.changeLight(1);
-          if(pstaggered)
+          else{
             pstaggered = false;
+            player.stagger = player.maxStagger;
+          }
+            
           if(estaggered){
             estaggered = false;
             enemy.stagger = enemy.maxStagger;
@@ -1585,6 +3158,7 @@ void draw(){
       rx=300;
       if(qEgo){
         SoundFile ego = new SoundFile(this,"red_mist_sfx/Kali_Change.wav");
+        Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
         EgoOn = true;
         qEgo = false;
         ego.play();
@@ -1754,8 +3328,10 @@ void draw(){
           else if(upstand&&hand.get(i)==0){
             text(player.pagedesc2[hand.get(i)],width-200,410);
           }
-          else 
+          else{
             text(player.pagedesc[hand.get(i)],width-200,410);
+          }
+            
           image(page,width-210,240,210,159);
           if(hand.get(i)==0){
            fill(146, 200, 139);
@@ -1887,7 +3463,18 @@ void draw(){
           else{
             text(player.egopages[selected.get(r)-5],width-200,235);
           }
-          text(player.pagedesc[selected.get(r)],width-200,410);
+          if(upstand&&selected.get(r)==0){
+            text(player.pagedesc2[selected.get(r)],width-200,410);
+          }
+          else if(spear&&selected.get(r)==1){
+            text(player.pagedesc2[selected.get(r)],width-200,410);
+          }
+          else if(level&&selected.get(r)==2){
+            text(player.pagedesc2[selected.get(r)],width-200,410);
+          }
+          else{
+            text(player.pagedesc[selected.get(r)],width-200,410);
+          }
           image(selection,width-210,240,210,159);
         }
         image(selection,600+r*55,300,50,38);
@@ -2126,85 +3713,7 @@ void draw(){
       }
     }
     
-    //check if Gebura is dead
-    if(player.hp<=0){
-      finished = true;
-      image(background,0,0,1152,648);
-      transition.setFill(0);
-      if(i<height){
-        image(background,0,0,1152,648);
-        shape(transition,0,i-648);
-        i+=200;
-      }
-      else if (i>=height){
-        shape(transition,0,0);
-        textSize(100);
-        fill(255,0,0);
-        text("DEFEAT",width/2-230,height/2);
-        fill(255);
-        rect(width/2-130,height*3/4-15,200,100);
-        textSize(50);
-        if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85){
-            fill(255,0,0);
-        }
-        else  
-          fill(100);
-        text("Retry",width/2-100,height*3/4+50);
-      }
-    }
     
-    //checks if Roland is dead or is moving to next phase
-    if(enemy.hp<=0&&enemy.phase!=4){
-      enemy.phase++;
-      animate = false;
-      while(selected.size()>0)
-        selected.remove(0);
-      while(eSelected.size()>0)
-        eSelected.remove(0);
-      phasechange=true;
-      bgm.pause();
-    }
-    
-    //roland is defeated
-    else if(enemy.hp<=0 && enemy.phase==4){
-      finished = true;
-      Rsprite=loadImage("roland/rolanddefeated.png");
-      if(EgoOn){
-        Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
-      }
-      else{
-        Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
-      }
-      transition.setFill(0);
-      if(i<height){
-        image(background,0,0,1152,648);
-        if(EgoOn){
-          image(Gsprite,700,340,187,100);
-        }
-        else{
-          image(Gsprite,700,340,122.4,142.6);
-        }
-        image(Rsprite,300,360,136.5,83.4);
-        shape(transition,0,i-648);
-        i+=200;
-      }
-      else if (i>=height){
-        shape(transition,0,0);
-        textSize(100);
-        fill(0,255,0);
-        text("VICTORY",width/2-230,height/2);
-        fill(255);
-        rect(width/2-130,height*3/4-15,200,100);
-        textSize(50);
-        if(mouseX>width/2-130&&mouseX<width/2+70&&mouseY>height*3/4-15&&mouseY<height*3/4+85){
-            fill(255,0,0);
-        }
-        else  
-          fill(100);
-        text("Retry",width/2-100,height*3/4+50);
-      }  
-
-    }
   } 
 }
 
@@ -2296,21 +3805,29 @@ void mouseClicked(){
       for(int r=0;r<hand.size();r++){
         if(mouseX>width/4*3-105*(r+1)&&mouseX<width/4*3-105*(r+1)+100&&mouseY>height-125&&mouseY<height){
           if(hand.get(r)==0){
-            if(player.light>=1){
+            if(upstand){
               selected.add(hand.remove(r));
-              if(!upstand)
-                player.light-=1;
+            }
+            else if(player.light>=1){
+              selected.add(hand.remove(r));
+              player.light-=1;
             }
           }
           else if(hand.get(r)==1){
-            if(player.light>=1){
+            if(spear){
+              selected.add(hand.remove(r));
+            }
+            else if(player.light>=1){
               selected.add(hand.remove(r));
               if(!spear)
                 player.light-=1;
             }
           }
           else if(hand.get(r)==2){
-            if(player.light>=1){
+            if(level){
+              selected.add(hand.remove(r));
+            }
+            else if(player.light>=1){
               selected.add(hand.remove(r));
               if(!level)
                 player.light-=1;
@@ -2353,13 +3870,16 @@ void mouseClicked(){
       for(int r=0;r<selected.size();r++){
         if(mouseX>600+r*55&&mouseX<600+r*55+50&&mouseY>300&&mouseY<338){
           if(selected.get(r)==0){
-            player.light+=1;
+            if(!upstand)
+              player.light+=1;
           }
           else if(selected.get(r)==1){
-            player.light+=1;
+            if(!spear)
+              player.light+=1;
           }
           else if(selected.get(r)==2){
-            player.light+=1;
+            if(!level)
+              player.light+=1;
           }
           else if(selected.get(r)==3){
             player.light+=2;
@@ -2430,6 +3950,12 @@ void keyPressed(){
       upstand = true;
       level = true;
     }
+  }
+  if(key=='z'){
+    enemy.hp= 1;
+  }
+  if(key=='k'){
+    player.light++;
   }
 }
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
