@@ -7325,58 +7325,7 @@ void mouseClicked(){
       start.play();
     }
 }
-void keyPressed(){
-  if(key == 'e')
-    player.addEmotion(1);
-  if(key=='f')
-    player.egoCount = 0;
-  if(key=='d')
-    enemy.damaged(1000);
-  if(key=='p')
-    player.damaged(1000);
-  if(key=='s')
-    scene++;
-  if(key=='m'){
-    if(!EgoOn){
-      EgoOn = true;
-      Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
-    }
-    else{
-      EgoOn = false;
-      Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
-    }
-  }
-  if(key=='b'){
-    player.stagger=10;
-  }
-  if(key=='u'){
-    enemy.stagger = 0; 
-    estaggered = true;
-  }
-  if(key=='l'){
-    if(spear){
-      spear = false;
-      upstand = false;
-      level = false;
-    }
-    else{
-      spear = true;
-      upstand = true;
-      level = true;
-    }
-  }
-  if(key=='z'){
-    enemy.hp= 1;
-  }
-  if(key=='k'){
-    player.light++;
-  }
-  if(key=='h'){
-    player.hp=100000000;
-    player.stagger=1000000;
-  }
-    
-}
+
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
 void dupeCheck(int i){
   int count=0;
