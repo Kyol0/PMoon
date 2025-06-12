@@ -15,7 +15,7 @@ PImage Rsprite;
 PImage Gsprite;
 Roland enemy;
 Gebura player;
-boolean phasechange=true;//phase change
+boolean phasechange=true; //phase change
 boolean draw; //draw phase
 boolean drawn; //if cards have been drawn
 boolean turn; //selecting cards phase
@@ -30,7 +30,6 @@ boolean spear; //checks if spear passive is active
 boolean level; //checks if level slash passive is active
 boolean upstand; //checks if upstanding slash passive is active 
 boolean allasPassive; //checks if allas Workshop passive is active
-boolean wheelsPassive; //checks if wheels industry passive is active
 int pAtk; // number of attacks in a certain card for player
 int eAtk; // number of attacks in a page for roland
 int currentPage; //current attack for player
@@ -45,6 +44,8 @@ int Gdmg; //dice roll for gebura
 int Rdmg; // dice roll for roland
 boolean rolled; // checks if rolled
 boolean onrush; // checks for onrush passive
+SoundFile mist; //sfx for red mist
+SoundFile silence; //sfx for black silence
 void setup(){
   size(1152,648);
   corner = new PVector(width,height);
@@ -90,6 +91,7 @@ void draw(){
   if(phasechange){
     eAtk=0;
     pAtk = 0;
+    estaggered = false;
     Rsprite = loadImage("roland/rolandidle.png");
     if(EgoOn){
       Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
@@ -98,36 +100,7 @@ void draw(){
       Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
     }
     turn = false;
-    if(enemy.phase==2){
-      enemy.changeHP(1000);
-      enemy.changeStagger(150);
-      enemy.maxStagger = enemy.stagger;
-      background=loadImage("backgrounds/phase2bg.png");
-      if(!bgm.isPlaying()){
-        bgm = new SoundFile(this,"music/Roland_2.mp3");
-        bgm.play();
-      }
-    }
-    if(enemy.phase==3){
-      enemy.changeHP(400);
-      enemy.changeStagger(200);
-      enemy.maxStagger = enemy.stagger;
-      background=loadImage("backgrounds/phase3bg.png");
-      if(!bgm.isPlaying()){
-        bgm = new SoundFile(this,"music/Roland_3.mp3");
-        bgm.play();
-      }
-    }
-    if(enemy.phase==4){
-      enemy.changeHP(999);
-      enemy.changeStagger(500);
-      enemy.maxStagger = enemy.stagger;
-      background=loadImage("backgrounds/phase4bg.png");
-      if(!bgm.isPlaying()){
-        bgm = new SoundFile(this,"music/Gone_Angels.mp3");
-        bgm.play();
-      }
-    }
+    phasechange(enemy);
     image(background,0,0,1152,648);
     if(EgoOn){
       image(Gsprite,700,340,187,100);
@@ -136,24 +109,7 @@ void draw(){
       image(Gsprite,700,340,122.4,142.6);
     }
     image(Rsprite,300,340,35.2,99.6);
-    fill(0);
-    rect(0,0,200,200);
-    fill(255);
-    textSize(50);
-    text("Roland",15,55);
-    textSize(25);
-    text("HP:" + enemy.hp,15,75);
-    text("Stagger: " + enemy.stagger,15,130);
-    fill(255,0,0);
-    rect(width-200,0,200,200);
-    fill(0);
-    textSize(50);
-    text("Gebura",width-170,55);
-    textSize(25);
-    text("HP: " + player.hp,width-170,75);
-    text("Stagger: " + player.stagger,width-170,110);
-    text("Light: " + player.light + "/" + player.maxLight,width-170,145);
-    text("Emotion Lvl: " + player.emotionlvl,width-170,180);
+    textbox(player,enemy);
    if(player.egoCount >=9){
       fill(158,0,0);
       circle(width,height,200);
@@ -206,6 +162,7 @@ void draw(){
   //checks if Roland is dead or is moving to next phase
   else if(enemy.hp<=0&&enemy.phase!=4){
     enemy.phase++;
+    scene++;
     animate = false;
     while(selected.size()>0)
       selected.remove(0);
@@ -388,6 +345,8 @@ void draw(){
     if(animate){
       SoundFile snap = new SoundFile(this, "other_sfx/Finger_Snapping.wav");
       SoundFile roll = new SoundFile(this,"other_sfx/Dice_Roll.wav");
+      if(pAtk==0&&currentPage!=-1)
+        delay(250);
         if(pAtk <= 0&&eAtk<=0){
           if(selected.size()>0){
             currentPage = selected.remove(0);
@@ -419,6 +378,7 @@ void draw(){
           else{
             currentPage =-1; 
           }
+          println("eSelected size: " +eSelected.size());
           if(eSelected.size()>0){
             enemyPage = eSelected.remove(0);
             if(enemyPage==0){
@@ -440,7 +400,7 @@ void draw(){
               eAtk = 3;
             }
             else if(enemyPage == 6){
-              eAtk = 4;
+              eAtk = 3;
             }
             else if (enemyPage==7){
               eAtk =3;
@@ -449,11 +409,14 @@ void draw(){
               eAtk = 2;
             }
             else if(enemyPage ==9){
-              eAtk=1;
+              eAtk=17;
             }
+            
           }
           else{
             enemyPage =-1; 
+            eAtk=0;
+            Rdmg=0;
           }
         }
 
@@ -719,7 +682,6 @@ void draw(){
           fill(255);
           textSize(20);
           text(Rdmg,rx+60,330);
-          SoundFile mist;
           
           PImage myImage;
           fill(0);
@@ -816,7 +778,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -862,7 +824,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -883,7 +845,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -932,7 +894,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -977,7 +939,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1023,7 +985,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1044,7 +1006,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1093,7 +1055,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1139,7 +1101,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1160,7 +1122,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1251,7 +1213,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1272,7 +1234,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1323,7 +1285,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1346,7 +1308,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1400,7 +1362,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1421,7 +1383,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1507,7 +1469,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1530,7 +1492,7 @@ void draw(){
                 }
                 gx+=2;
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
                 if(player.stagger==0){
                   pAtk=0;
                   while(selected.size()>0){
@@ -1542,6 +1504,7 @@ void draw(){
 
           //no page
           else if(currentPage==-1){
+            
             if(EgoOn){
               Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
               image(Gsprite,gx,340,119,130);
@@ -1551,20 +1514,18 @@ void draw(){
               image(Gsprite,gx,340,109,130);
             }
             gx+=2;
+            
+            
+            player.damaged(Rdmg);
+            player.staggerDamage(Rdmg/2);
             if(player.stagger==0){
-              player.damaged(Rdmg*2);
-            }
-            else{
-              player.damaged(Rdmg);
-              player.staggerDamage(Rdmg);
-              if(player.stagger==0){
-                pAtk=0;
-                while(selected.size()>0){
-                  selected.remove(0);
-                }
+              pAtk=0;
+              while(selected.size()>0){
+                selected.remove(0);
               }
-
             }
+
+            
             
           }
         }
@@ -1575,8 +1536,7 @@ void draw(){
           rect(gx,280,90,58);
           fill(255);
           textSize(10);
-          SoundFile mist;
-          SoundFile silence;
+          
           if(currentPage==0&&pAtk>0){
             text(player.pages[0],gx+2,288);
             myImage = loadImage("kali/CardUpstandingSlashArt.png");
@@ -1686,14 +1646,24 @@ void draw(){
             }
           }
           
+
           else{
             if(currentPage!=6)
               delay(250);
-            if(enemyPage==0)
-              delay(1000);
+            if(allasPassive&&enemyPage!=0)
+            allasPassive=false;
+            
+            /*if(enemyPage==0||enemyPage==1||enemyPage==2||enemyPage==3||enemyPage==4||enemyPage==5||enemyPage==6||enemyPage==8){
+              //if(enemyPage==8||enemyPage==6||enemyPage==4)
+              //delay(500);
+            }
+            else{
+              eAtk=0;
+              Rdmg  =0;
+            }
+              */
+
             //they fight back
-            if(enemyPage!=0)
-            eAtk=0;
             if(pause&&currentPage!=6){
               if(EgoOn){
                 Gsprite = loadImage("kali/The-red-mist-combat-sprite-move.png");
@@ -1710,7 +1680,8 @@ void draw(){
 
             //upstanding slash
             else if(currentPage==0){
-              snap.play();
+              if(enemyPage!=9)
+                snap.play();
               
               pause = true;
               myImage = loadImage("kali/CardUpstandingSlashArt.png");
@@ -1724,67 +1695,59 @@ void draw(){
                 if(EgoOn){
                   Gdmg+=2;
                 }
-
-                //allas Workshop
+                
+                //allas Workshop roll
                 if(enemyPage==0){
-                  allasPassive = true;
-                  if(eAtk==2){
-                    Rdmg = (int)(random(5)+5);
-                    textSize(20);
-                    text(Rdmg,rx+60,335);
-                    if(Rdmg>Gdmg){
-                      silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
-                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
-                      Rfx = loadImage("roland/allas.png");
-                      silence.play();
-                      image(Rsprite,rx+20,360,228,80);
-                      image(Rfx,rx+50,330,228,120);
-                      player.addEmotion(-1);
-                    }
-                    else if(Rdmg==Gdmg||(currentPage==3&&pAtk==2)||currentPage==7){
-                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
-                      image(Rsprite,rx+20,360,228,80);
-                    }
-                    else{
-                      Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
-                      image(Rsprite, rx+50,340,61,100);
-                    }
-                    eAtk--;
-                  }
-                  else if(eAtk==1){
-                    Rdmg = (int)(random(4)+5);
-                    textSize(20);
-                    text(Rdmg,rx+60,335);
-                    if(Rdmg>Gdmg){
-                      silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
-                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
-                      Rfx = loadImage("roland/allas.png");
-                      silence.play();
-                      image(Rsprite,rx+20,360,228,80);
-                      image(Rfx,rx+50,330,228,120);
-                      player.addEmotion(-1);
-                    }
-                    else if(Rdmg==Gdmg||(currentPage==3&&pAtk==2)||currentPage==7){
-                      Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
-                      image(Rsprite,rx,360,228,80);
-                    }
-                    else{
-                      Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
-                      image(Rsprite, rx+50,340,61,100);
-                    }
-                    eAtk--;
-                  }
+                  allasroll();
                 }
 
-                println("pdmg:" + Gdmg);
-                println("edmg:" + Rdmg);
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
                 
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 if(Gdmg>Rdmg){
                   
                   if(Gdmg>=8)
                     upstand = true;
-                  
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  eAtk--;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     Gfx = loadImage("kali/upstanding.png");
@@ -1808,12 +1771,80 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
                 else if(Gdmg==Rdmg){
                   mist = new SoundFile(this,"other_sfx/clash.wav");
                   mist.play();
+
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     image(Gsprite,gx-90,325,226,160);
@@ -1821,9 +1852,46 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
+                  }
+
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
                   }
                 }
-                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     image(Gsprite,gx-90,325,226,160);
@@ -1831,6 +1899,28 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
+                  }
+
+                  //blocks
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
                   }
                 }
                 else{
@@ -1842,9 +1932,67 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
+                  
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -1852,26 +2000,73 @@ void draw(){
                     }
                   }
                 }
+                
                 pAtk--;
               }
               else if(pAtk ==1){
                 pause = true;
-                Gdmg = 3;//(int)(random(4)+6);
+                Gdmg = (int)(random(4)+6);
                 if(allasPassive)
                   Gdmg-=2;
                 if(EgoOn){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
                 
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 allasPassive=false;
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   if(Gdmg>=8)
                     upstand = true;
-                  
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  eAtk--;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     Gfx = loadImage("kali/upstanding.png");
@@ -1896,10 +2091,18 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
-                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     image(Gsprite,gx-90,325,226,160);
@@ -1907,6 +2110,28 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
+                  }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
                   }
                 }
                 else if(Gdmg==Rdmg){
@@ -1920,6 +2145,103 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
                   }
+
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                   
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -1930,9 +2252,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                      
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -1951,9 +2330,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -1965,7 +2401,8 @@ void draw(){
 
             //spear
             else if(currentPage==1){
-              snap.play();
+              if(enemyPage!=9)
+                snap.play();
               pause = true;
               myImage = loadImage("kali/CardSpearArt.png");
               if(pAtk ==3){
@@ -1976,13 +2413,58 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   if(Gdmg>=8)
                     spear = true;
-                  
-                  
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
+                  eAtk--;
                   gx-=2;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
@@ -2007,10 +2489,18 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
-                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
                     image(Gsprite,gx-200,350,391,94);
@@ -2019,17 +2509,136 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
                     image(Gsprite,gx-180,350,227,94);
                   }
+
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
+                  }
                 }
                 else if(Gdmg==Rdmg){
                   mist = new SoundFile(this,"other_sfx/clash.wav");
                   mist.play();
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
-                    image(Gsprite,gx-90,325,226,160);
+                    image(Gsprite,gx-200,350,391,94);
                   }
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
-                    image(Gsprite, gx-10,330,193,137);
+                    image(Gsprite,gx-180,350,227,94);
+                  }
+
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
                   }
                 }
                 else{
@@ -2041,9 +2650,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2061,13 +2727,59 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   if(Gdmg>=8)
                     spear = true;
-                  
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  eAtk--;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
                     Gfx = loadImage("kali/spear.png");
@@ -2093,10 +2805,18 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
-                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
                     image(Gsprite,gx-200,350,391,94);
@@ -2105,17 +2825,137 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
                     image(Gsprite,gx-180,350,227,94);
                   }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
+                  }
                 }
                 else if(Gdmg==Rdmg){
                   mist = new SoundFile(this,"other_sfx/clash.wav");
                   mist.play();
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
-                    image(Gsprite,gx-90,325,226,160);
+                    image(Gsprite,gx-200,350,391,94);
                   }
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
-                    image(Gsprite, gx-10,330,193,137);
+                    image(Gsprite,gx-180,350,227,94);
+                  }
+                  
+                    
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
                   }
                 }
                 else{
@@ -2127,9 +2967,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2148,14 +3045,60 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 allasPassive=false;
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   if(Gdmg>=8)
                     spear = true;
-                  
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  eAtk--;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
                     Gfx = loadImage("kali/spear.png");
@@ -2180,10 +3123,18 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
-                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
                     image(Gsprite,gx-200,350,391,94);
@@ -2192,17 +3143,136 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
                     image(Gsprite,gx-180,350,227,94);
                   }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
+                  }
                 }
                 else if(Gdmg==Rdmg){
                   mist = new SoundFile(this,"other_sfx/clash.wav");
                   mist.play();
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-pierce.png");
-                    image(Gsprite,gx-90,325,226,160);
+                    image(Gsprite,gx-200,350,391,94);
                   }
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-pierce.png");
-                    image(Gsprite, gx-10,330,193,137);
+                    image(Gsprite,gx-150,350,227,94);
+                  }
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
                   }
                 }
                 else{
@@ -2214,9 +3284,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2235,9 +3362,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2249,7 +3433,8 @@ void draw(){
 
             //level slash
             else if(currentPage==2){
-              snap.play();
+              if(enemyPage!=9)
+                snap.play();
               pause = true;
               myImage = loadImage("kali/CardLevelSlashArt.png");
               if(pAtk ==2){
@@ -2260,13 +3445,59 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   if(Gdmg>=8)
                     level = true;
-                  
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  eAtk--;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
                     Gfx = loadImage("kali/level.png");
@@ -2293,8 +3524,17 @@ void draw(){
                   }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                 }
-                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
                     image(Gsprite,gx-50,330,218,120);
@@ -2302,6 +3542,28 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
                     image(Gsprite, gx-10,325,156,120);
+                  }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
                   }
                 }
                 else if(Gdmg==Rdmg){
@@ -2315,6 +3577,103 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
                     image(Gsprite, gx-10,325,156,120);
                   }
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -2326,13 +3685,70 @@ void draw(){
                     image(Gsprite,gx,340,109,130);
                   }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
                       selected.remove(0);
                     }
+                  }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
                   }
                 }
                 pAtk--;
@@ -2346,14 +3762,60 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 allasPassive=false;
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   if(Gdmg>=8)
                     level = true;
-                  
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  eAtk--;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
                     Gfx = loadImage("kali/level.png");
@@ -2378,10 +3840,18 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
-                else if((Gdmg==Rdmg)||(enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-blunt.png");
                     image(Gsprite,gx-50,330,218,120);
@@ -2390,6 +3860,28 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
                     image(Gsprite, gx-10,325,156,120);
                   }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
+                  }}
                 }
                 else if(Gdmg==Rdmg){
                   mist = new SoundFile(this,"other_sfx/clash.wav");
@@ -2402,6 +3894,103 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-blunt.png");
                     image(Gsprite, gx-10,325,156,120);
                   }
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -2412,9 +4001,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2433,9 +4079,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2447,7 +4150,8 @@ void draw(){
 
             //focus spirit
             else if(currentPage==3){
-              snap.play();
+              if(enemyPage!=9)
+                snap.play();
               pause = true;
               myImage = loadImage("kali/CardFocusSpiritArt.png");
               if(pAtk ==2){
@@ -2458,6 +4162,50 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 textSize(20);
                 text(Gdmg,gx+20,335);
                 if(Gdmg>=Rdmg){
@@ -2472,6 +4220,121 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-guard.png");
                     image(Gsprite, gx,340,57,102);
                   }
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                      image(Rsprite,rx+50,340,62,90);
+                      
+                    }
+                    else if(eAtk==2){
+                      silence = new SoundFile(this,"other_sfx/clash.wav");
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                      silence.play();
+                      image(Rsprite,rx,280,252,180);
+                      
+                    }
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                         
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                      image(Rsprite,rx+50,340,62,90);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                      image(Rsprite,rx+40,330,105,95);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                      image(Rsprite,rx+20,340,97,95);
+                    }
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -2481,6 +4344,61 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
+                  }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
                   }
                   gx+=2;
                   player.damaged(Rdmg-Gdmg);
@@ -2503,12 +4421,58 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 allasPassive=false;
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
-                  
+                if(Gdmg>Rdmg){
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  eAtk--;
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     Gfx = loadImage("kali/upstanding.png");
@@ -2533,10 +4497,18 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
-                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     image(Gsprite,gx-90,325,226,160);
@@ -2544,6 +4516,28 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
+                  }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
                   }
                 }
                 else if(Gdmg==Rdmg){
@@ -2557,6 +4551,103 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
                   }
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -2567,9 +4658,67 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2588,9 +4737,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2602,7 +4808,8 @@ void draw(){
 
             //onrush
             else if(currentPage==4){
-              snap.play();
+              if(enemyPage!=9)
+                snap.play();
               pause = true;
               myImage = loadImage("kali/CardOnrushArt.png");
               if(pAtk ==1){
@@ -2614,12 +4821,64 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 allasPassive=false;
                 textSize(20);
                 text(Gdmg,gx+15,335);
-                if(Gdmg>=Rdmg){
-                  
+                if(Gdmg>Rdmg){
+                  Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
+                  image(Rsprite, rx+50,340,61,100);
                   gx-=2;
+                  if(enemyPage==1){
+                    eAtk=0;
+                  }
+                  else{
+                    eAtk--;
+                  }
+                  
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     image(Gsprite,gx-90,325,226,160);
@@ -2644,10 +4903,18 @@ void draw(){
                     enemy.damaged(Gdmg);
                     enemy.staggerDamage(Gdmg);
                   }
+                  if(!estaggered&&enemy.stagger==0){
+                   
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
                 }
-                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-slash.png");
                     image(Gsprite,gx-90,325,226,160);
@@ -2655,6 +4922,28 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
+                  }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk=0;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
                   }
                 }
                 else if(Gdmg==Rdmg){
@@ -2668,6 +4957,103 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-slash.png");
                     image(Gsprite, gx-10,330,193,137);
                   }
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk=0;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -2678,9 +5064,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk=0;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2692,6 +5135,14 @@ void draw(){
                   onrush = false;
                 else if(enemy.stagger==0){
                   onrush = true;
+                }
+                if(!estaggered&&enemy.stagger==0){
+                    
+                  while(eSelected.size()>0){
+                    eSelected.remove(0);
+                  }
+                  eAtk=0;
+                  Rdmg=0;
                 }
                 if(!onrush){
                   pAtk--;
@@ -2706,9 +5157,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk=0;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                   zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2719,7 +5227,7 @@ void draw(){
             }
 
             //great split vertical
-            if(currentPage==6){
+            else if(currentPage==6){
               myImage = loadImage("kali/CardGreaterSplitVerticalArt.png");
               if(pAtk == 15){
                 Gdmg = (int)(random(20)+20);
@@ -2729,14 +5237,73 @@ void draw(){
                   Gdmg+=2;
                 }
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasPassive = true;
+                  if(eAtk==2){
+                    Rdmg = (int)(random(5)+5);
+                    textSize(20);
+                    text(Rdmg,rx+60,335);
+
+                  }
+                  else if(eAtk==1){
+                    Rdmg = (int)(random(4)+5);
+                    textSize(20);
+                    text(Rdmg,rx+60,335);
+
+                  }
+                  else
+                    Rdmg=0;
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 allasPassive=false;
                 textSize(20);
                 text(Gdmg,gx+15,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   eAtk=0;
                   Rsprite = loadImage("roland/BlackSilenceCombatDamaged.png");
                   mist = new SoundFile(this,"red_mist_sfx/Kali_Normal_Vert.wav");
                   mist.play();
+                  eAtk--;
                   image(Rsprite, rx+50,340,61,100);
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-1.png");
@@ -2900,8 +5467,17 @@ void draw(){
                     eSelected.remove(0);
                   player.addEmotion(1);
                   player.recoverHP(Gdmg);
+                  if(!estaggered&&enemy.stagger==0){
+                    
+                    while(eSelected.size()>0){
+                      eSelected.remove(0);
+                    }
+                    eAtk=0;
+                    Rdmg=0;
+                  }
                 }
-                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==4)){
+                
+                else if((enemyPage==1&&eAtk==1)||(enemyPage==3&&eAtk==2)||(enemyPage==6&&eAtk==3)){
                   if(EgoOn){
                     Gsprite = loadImage("kali/The-red-mist-combat-sprite-attack-5.png");
                     image(Gsprite,gx-90,325,226,160);
@@ -2909,6 +5485,28 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-attack-5.png");
                     image(Gsprite, gx-50,330,190,150);
+                  }
+                  
+                  //block
+                  if(enemyPage == 1||enemyPage==3){
+                    silence = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                    silence.play();
+                    image(Rsprite,rx+50,340,62,90);
+                    eAtk--;
+                    if(Rdmg>Gdmg){
+                      player.staggerDamage(Rdmg/2);
+                    }
+                  }
+                  
+                  //evasion
+                  else if(enemyPage == 6){
+                    silence = new SoundFile(this,"black_silence_sfx/Roland_Evasion.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                    silence.play();
+                    image(Rsprite,rx+20,340,97,95);
+                    if(Rdmg>Gdmg||currentPage==7)
+                      eAtk--;
                   }
                 }
                 else if(Gdmg==Rdmg){
@@ -2922,6 +5520,103 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-attack-5.png");
                     image(Gsprite, gx-10,330,193,137);
                   }
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    silence = new SoundFile(this,"other_sfx/clash.wav");
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                    silence.play();
+                    image(Rsprite,rx,280,252,180);
+                    eAtk=0;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                    image(Rsprite,rx+40,330,105,95);
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -2932,9 +5627,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2961,9 +5713,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -2975,18 +5784,63 @@ void draw(){
 
             //manifest ego
             else if(currentPage==7){
-              snap.play();
+              if(enemyPage!=9)
+                snap.play();
               qEgo = true;
               pause = true;
               myImage = loadImage("kali/CardManifestEgoArt.png");
               if(pAtk ==2){
                 Gdmg = (int)(random(8)+8);
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 if(allasPassive)
                   Gdmg-=2;
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   mist = new SoundFile(this,"other_sfx/Defense_Guard_Win.wav");
                   mist.play();
                   gx-=2;
@@ -2998,6 +5852,122 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-guard.png");
                     image(Gsprite, gx,340,57,102);
                   }
+                  enemy.staggerDamage(Gdmg);
+
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                      image(Rsprite,rx+50,340,62,90);
+                      
+                    }
+                    else if(eAtk==2){
+                      silence = new SoundFile(this,"other_sfx/clash.wav");
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                      silence.play();
+                      image(Rsprite,rx,280,252,180);
+                      
+                    }
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                      
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                      image(Rsprite,rx+50,340,62,90);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                      image(Rsprite,rx+40,330,105,95);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                      image(Rsprite,rx+20,340,97,95);
+                    }
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -3007,6 +5977,61 @@ void draw(){
                   else{
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
+                  }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
                   }
                   gx+=2;
                   player.damaged(Rdmg-Gdmg);
@@ -3024,6 +6049,50 @@ void draw(){
                 pause = true;
                 Gdmg = (int)(random(8)+8);
                 
+                //allas Workshop roll
+                if(enemyPage==0){
+                  allasroll();
+                }
+                
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
                 if(allasPassive)
                   Gdmg-=2;
                 if(EgoOn){
@@ -3032,7 +6101,7 @@ void draw(){
                 allasPassive=false;
                 textSize(20);
                 text(Gdmg,gx+20,335);
-                if(Gdmg>=Rdmg){
+                if(Gdmg>Rdmg){
                   mist = new SoundFile(this,"other_sfx/Defense_Evasion.wav");
                   mist.play();
                   gx-=2;
@@ -3045,6 +6114,121 @@ void draw(){
                     image(Gsprite,gx-10,335,135,110);
                   }
                   player.staggerDamage(-1*Gdmg);
+                  
+                  //allas Workshop clash
+                  if(enemyPage==0){
+                    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+                    image(Rsprite,rx,360,228,80);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry clash
+                  if(enemyPage==1){
+                    if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                      image(Rsprite,rx+50,340,62,90);
+                      
+                    }
+                    else if(eAtk==2){
+                      silence = new SoundFile(this,"other_sfx/clash.wav");
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+                      silence.play();
+                      image(Rsprite,rx,280,252,180);
+                      
+                    }
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop clash
+                  if(enemyPage==2){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+                      image(Rsprite,rx+30,340,169,100);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+                      image(Rsprite,rx+30,340,141,150);
+                    }
+                    eAtk--;
+                  }
+                                           
+                  //old boys workshop clash
+                  if(enemyPage==3){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlock.png");
+                      image(Rsprite,rx+50,340,62,90);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+                      image(Rsprite,rx+40,330,105,95);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //ranga workshop clash
+                  if(enemyPage==5){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+                      image(Rsprite,rx+300,340,156,85);
+                    }
+                    else if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+                      image(Rsprite,rx+30,340,92,85);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+                      image(Rsprite,rx+300,340,202,85);
+                    }
+                    eAtk--;
+                  }
+                                    
+                  //mook workshop clash
+                  if(enemyPage==4){
+                    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+                    image(Rsprite,rx-20,340,150,95);
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier clash
+                  if(enemyPage == 6){
+                    if(eAtk==3){
+                      Rsprite = loadImage("roland/BlackSilenceCombatEvade.png");
+                      image(Rsprite,rx+20,340,97,95);
+                    }
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+                      image(Rsprite,rx+300,340,172,150);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+                      image(Rsprite,rx+30,340,172,150);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //durandal clash
+                  if(enemyPage==8){
+                    if(eAtk==2){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+                      image(Rsprite,rx+300,340,176,180);
+                    }
+                    else if(eAtk==1){
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+                      image(Rsprite,rx+30,340,162,180);
+                    }
+                    eAtk--;
+                  }
+                  
+                  //furioso clash
+                  if(enemyPage==9){
+                     if(eAtk==16){
+                      silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+                      silence.play();
+                      Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+                      image(Rsprite,rx,340,151,99);
+                    }
+                    eAtk=0;
+                  }
                 }
                 else{
                   if(EgoOn){
@@ -3055,9 +6239,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+   
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -3078,9 +6319,66 @@ void draw(){
                     Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                     image(Gsprite,gx,340,109,130);
                   }
+                  player.addEmotion(-1);
+                  
+                  //allas Workshop attack
+                  if(enemyPage==0&&eAtk>0){
+                    allas(Rsprite,Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //wheels industry attack
+                  if(enemyPage==1&&eAtk>1){
+                    wheels(Rsprite, Rfx, silence, rx);
+                    eAtk--;
+                  }
+                  
+                  //zelkova Workshop attack
+                  if(enemyPage==2&&eAtk>0){
+                    zelkova(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                  
+                  //old boys workshop attack
+                  if(enemyPage==3&&eAtk>0){
+                    oldboys(Rsprite,Rfx,silence,rx);
+                    eAtk--;
+                  }
+                     
+                  //ranga Workshop attack
+                  if(enemyPage==5&&eAtk>0){
+                    ranga();
+                    eAtk--;
+                  }
+                  
+                  //mook Workshop attack
+                  if(enemyPage==4&&eAtk>0){
+                    mook();
+                    eAtk--;
+                  }
+                  
+                  //crystal atelier attack
+                  if(enemyPage==6&&eAtk>0){
+                    crystal();
+                    eAtk--;
+                  }
+                  
+                  //durandal attack
+                  if(enemyPage==8&&eAtk>0){
+                    durandal();
+                    eAtk--;
+                  }
+
+                  //furioso attack
+                  if(enemyPage==9&&eAtk>0){
+                    furioso();
+                    eAtk--;
+                  }
                   gx+=2;
-                  player.damaged(Rdmg);
-                  player.staggerDamage(Rdmg);
+                  if(enemyPage!=9){
+                    player.damaged(Rdmg);
+                    player.staggerDamage(Rdmg/2);
+                  }
                   if(player.stagger==0){
                     pAtk=0;
                     while(selected.size()>0){
@@ -3093,7 +6391,62 @@ void draw(){
             //no page
             else if(currentPage==-1){
               pause = true;
+              //allas Workshop roll
+              if(enemyPage==0){
+                allasPassive = true;
+                if(eAtk==2){
+                  Rdmg = (int)(random(5)+5);
+                  textSize(20);
+                  text(Rdmg,rx+60,335);
+                }
+                else if(eAtk==1){
+                  Rdmg = (int)(random(4)+5);
+                  textSize(20);
+                  text(Rdmg,rx+60,335);
+                }
+                else
+                  Rdmg=0;
+              }
               
+                //wheels industry roll
+                if(enemyPage==1){
+                  wheelsroll();
+                }
+                
+                //zelkova Workshop roll
+                if(enemyPage==2){
+                  zelkovaroll();
+                }
+                
+                //old boys Workshop roll
+                if(enemyPage==3){
+                  oldboysroll();
+                }
+                
+                //ranga Workshop roll
+                if(enemyPage==5){
+                  rangaroll();
+                }
+                
+                //mook workshop roll
+                if(enemyPage==4){
+                  mookroll();
+                }
+                
+                //crystal atelier roll
+                if(enemyPage==6){
+                  crystalroll();
+                }
+                
+                //durandal roll
+                if(enemyPage==8){
+                  durandalroll();
+                }
+
+                //furioso roll
+                if(enemyPage==9){
+                  furiosoroll();
+                }
               if(EgoOn){
                 Gsprite = loadImage("kali/The-red-mist-combat-sprite-damaged.png");
                 image(Gsprite,gx,340,119,130);
@@ -3102,18 +6455,73 @@ void draw(){
                 Gsprite = loadImage("kali/Kali-combat-sprite-damaged.png");
                 image(Gsprite,gx,340,109,130);
               }
+              
+              //allas Workshop attack
+              if(enemyPage==0&&eAtk>0){
+                allas(Rsprite,Rfx, silence, rx);
+                eAtk--;
+              }
+              
+              //wheels industry attack
+              if(enemyPage==1&&eAtk>1){
+                wheels(Rsprite, Rfx, silence, rx);
+                eAtk=0;
+              }
+              
+              //zelkova Workshop attack
+              if(enemyPage==2&&eAtk>0){
+                zelkova(Rsprite,Rfx,silence,rx);
+                eAtk--;
+              }
+              
+              //old boys workshop attack
+              if(enemyPage==3&&eAtk>0){
+                oldboys(Rsprite,Rfx,silence,rx);
+                eAtk--;
+              }
+
+              //ranga Workshop attack
+              if(enemyPage==5&&eAtk>0){
+                ranga();
+                eAtk--;
+              }
+              
+              //mook Workshop attack
+              if(enemyPage==4&&eAtk>0){
+                mook();
+                eAtk--;
+              }
+              
+              //crystal atelier attack
+              if(enemyPage==6&&eAtk>0){
+                crystal();
+                eAtk--;
+              }
+              
+              //durandal attack
+              if(enemyPage==8&&eAtk>0){
+                durandal();
+                eAtk--;
+              }
+
+              //furioso attack
+              if(enemyPage==9&&eAtk>0){
+                furioso();
+                eAtk--;
+              }
               gx+=2;
               if(player.stagger==0){
                 pAtk=0;
                 while(selected.size()>0){
                   selected.remove(0);
                 }
-                player.damaged(Rdmg*2);
               }
-              else{
+              if(enemyPage!=9){
                 player.damaged(Rdmg);
-                player.staggerDamage(Rdmg);
+                player.staggerDamage(Rdmg/2);
               }
+              
+            
             }
           }
         }
@@ -3124,22 +6532,23 @@ void draw(){
           scene++;
           eAtk=0;
           pAtk = 0;
-          if(player.stagger ==0){
-            if(!pstaggered)
+          if(player.stagger ==0&&!pstaggered){
               pstaggered = true;
           }
-          if(!pstaggered)
+          else if(!pstaggered)
             player.changeLight(1);
           else{
             pstaggered = false;
             player.stagger = player.maxStagger;
           }
-            
+          
           if(estaggered){
             estaggered = false;
             enemy.stagger = enemy.maxStagger;
           }
-            
+          else if(!estaggered&&enemy.stagger==0){
+            estaggered = true;
+          } 
           Rsprite = loadImage("roland/rolandidle.png");
           if(EgoOn){
             Gsprite = loadImage("kali/The-red-mist-combat-sprite-idle.png");
@@ -3147,7 +6556,6 @@ void draw(){
           else{
             Gsprite = loadImage("kali/Kali-combat-sprite-idle.png");
           }
-          snap.play();
         }
       
     }
@@ -3482,12 +6890,13 @@ void draw(){
       
       //if roland is staggered he does nothing.
       if(estaggered){
-
+        //...Umbrella warfare, I guess?
       }
 
       //black silence cards used
       else if(scene%4 ==1){
-        for(int i = 1; i<=5;i++){
+        int r = enemy.phase+2;
+        for(int i = 1; i<=r;i++){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Atelier Logic.png"); 
@@ -3509,7 +6918,6 @@ void draw(){
             rPages = loadImage("roland/Old Boys Workshop.png"); 
             eSelected.add(3);
           }
-          println(eSelected);
           //hover over black silence cards
           if(mouseX>200+i*55&&mouseX<200+i*55+50&&mouseY>300&&mouseY<338){
            stroke(255,255,0);
@@ -3547,7 +6955,8 @@ void draw(){
         }
       }
       else if(scene%4 ==2){
-        for(int i = 1; i<=5;i++){
+        int r = enemy.phase+2;
+        for(int i = 1; i<=r;i++){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Wheels Industry.png"); 
@@ -3607,7 +7016,8 @@ void draw(){
         }
       }
       else if(scene%4 ==3){
-        for(int i = 1; i<=5;i++){
+        int r = enemy.phase+2;
+        for(int i = 1; i<=r;i++){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Crystal Atelier.png"); 
@@ -3642,7 +7052,7 @@ void draw(){
             }
             else if(i==2){
               fill(95, 139, 227);
-              page = 5;
+              page = 4;
             }
             else if(i==3){
               fill(146, 200, 139);
@@ -3667,7 +7077,8 @@ void draw(){
         }
       }
       else if(scene%4 ==0){
-        for(int i = 1; i<=3;i++){
+        int r = enemy.phase;
+        for(int i = 1; i<=r;i++){
           PImage rPages;
           if(i==1){
             rPages = loadImage("roland/Furioso.png"); 
@@ -3735,6 +7146,9 @@ void reset(){
   animate = false;
   EgoOn = false;
   i=0;
+  level = false;
+  upstand = false;
+  spear = false;
   hand = new ArrayList<Integer>();
   hand.add((int)random(5));
   hand.add((int)random(5));
@@ -3957,6 +7371,11 @@ void keyPressed(){
   if(key=='k'){
     player.light++;
   }
+  if(key=='h'){
+    player.hp=100000000;
+    player.stagger=1000000;
+  }
+    
 }
 //adds pages into the hand, and makes sure there are a correct corresponding number of pages in the hand
 void dupeCheck(int i){
@@ -3972,4 +7391,483 @@ void dupeCheck(int i){
   }
   else
     hand.add(i);
+}
+
+//allas
+void allas(PImage Rsprite, PImage Rfx, SoundFile silence,int rx){
+    silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
+    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+    Rfx = loadImage("roland/allas.png");
+    silence.play();
+    image(Rsprite,rx+20,360,228,80);
+    image(Rfx,rx+50,330,228,120);
+    
+}
+
+//phasechange
+void phasechange(Roland enemy){
+  if(enemy.phase==2){
+    enemy.changeHP(1000);
+    enemy.changeStagger(150);
+    enemy.maxStagger = enemy.stagger;
+    background=loadImage("backgrounds/phase2bg.png");
+    if(!bgm.isPlaying()){
+      bgm = new SoundFile(this,"music/Roland_2.mp3");
+      bgm.play();
+    }
+  }
+  if(enemy.phase==3){
+    enemy.changeHP(400);
+    enemy.changeStagger(200);
+    enemy.maxStagger = enemy.stagger;
+    background=loadImage("backgrounds/phase3bg.png");
+    if(!bgm.isPlaying()){
+      bgm = new SoundFile(this,"music/Roland_3.mp3");
+      bgm.play();
+    }
+  }
+  if(enemy.phase==4){
+    enemy.changeHP(999);
+    enemy.changeStagger(500);
+    enemy.maxStagger = enemy.stagger;
+    background=loadImage("backgrounds/phase4bg.png");
+    if(!bgm.isPlaying()){
+      bgm = new SoundFile(this,"music/Gone_Angels.mp3");
+      bgm.play();
+    }
+  }
+}
+
+//textbox
+void textbox(Gebura player, Roland enemy){
+  fill(0);
+  rect(0,0,200,200);
+  fill(255);
+  textSize(50);
+  text("Roland",15,55);
+  textSize(25);
+  text("HP:" + enemy.hp,15,75);
+  text("Stagger: " + enemy.stagger,15,130);
+  fill(255,0,0);
+  rect(width-200,0,200,200);
+  fill(0);
+  textSize(50);
+  text("Gebura",width-170,55);
+  textSize(25);
+  text("HP: " + player.hp,width-170,75);
+  text("Stagger: " + player.stagger,width-170,110);
+  text("Light: " + player.light + "/" + player.maxLight,width-170,145);
+  text("Emotion Lvl: " + player.emotionlvl,width-170,180);
+}
+
+//wheels
+void wheels(PImage Rsprite, PImage Rfx, SoundFile silence,int rx){
+  if(selected.size()>0)
+    selected.remove(0);
+  silence = new SoundFile(this,"black_silence_sfx/Roland_GreatSword.wav");
+  Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+  silence.play();
+  image(Rsprite,rx+20,280,252,180);
+  
+}
+
+//zelkova
+void zelkova(PImage Rsprite,PImage Rfx,SoundFile silence,int rx){
+  if(eAtk==2){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+    Rfx = loadImage("roland/zelkova.png");
+    image(Rsprite,rx+30,340,169,100);
+    image(Rfx,rx+60,330,135,150);
+  }
+  else if(eAtk==1){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+    Rfx = loadImage("roland/zelkova2.png");
+    image(Rsprite,rx+30,340,141,150);
+    image(Rfx,rx+60,330,162,180);
+  }
+  silence = new SoundFile(this,"black_silence_sfx/Roland_Axe.wav");
+  silence.play();
+  
+}
+
+//old boys
+void oldboys(PImage Rsprite,PImage Rfx,SoundFile silence,int rx){
+  silence = new SoundFile(this,"black_silence_sfx/Roland_Mace.wav");
+  Rsprite = loadImage("roland/BlackSilenceCombatBlunt.png");
+  Rfx = loadImage("roland/ranga.png");
+  silence.play();
+  image(Rsprite,rx+40,330,105,95);
+  image(Rfx,rx+20,330,167,60);
+  
+  enemy.staggerDamage(-5);
+}
+
+//mook
+void mook(){
+  player.damaged(3);
+  silence = new SoundFile(this,"black_silence_sfx/Roland_LongSword_Atk.wav");
+  Rsprite = loadImage("roland/BlackSilenceCombatSpecial4.png");
+  Rfx = loadImage("roland/mookm.png");
+  image(Rfx,gx+30,350,80,80);
+  silence.play();
+  image(Rsprite,rx-20,340,150,95);
+  
+  delay(250);
+}
+
+//ranga
+void ranga(){
+  if(eAtk==3){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial5.png");
+    image(Rsprite,rx+300,340,156,85);
+    Rfx = loadImage("roland/oldboys1.png");
+    image(Rfx,rx+270,360,185,50);
+  }
+  else if(eAtk==2){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial6m.png");
+    image(Rsprite,rx+30,340,92,85);
+    Rfx = loadImage("roland/oldboys2.png");
+    image(Rfx,rx,360,159,50);
+  }
+  else if(eAtk==1){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial7.png");
+    image(Rsprite,rx+300,340,202,85);
+  }
+  silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
+  silence.play();
+  
+}
+
+//Crystal
+void crystal(){
+  if(eAtk==3&&currentPage==-1){
+    eAtk--;
+  }
+
+  if(eAtk==2){
+    Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+    image(Rsprite,rx+300,340,172,150);
+    Rfx = loadImage("roland/crystalatelier.png");
+    image(Rfx,rx+400,300,134,170);
+  }
+  else if(eAtk==1){
+    Rsprite = loadImage("roland/BlackSilenceCombatSlashm.png");
+    image(Rsprite,rx+30,340,172,150);
+    Rfx = loadImage("roland/crystalatelierm.png");
+    image(Rfx,rx-100,300,134,170);
+  }
+  silence = new SoundFile(this,"black_silence_sfx/Roland_DuelSword.wav");
+  silence.play();
+  
+}
+
+//allas roll
+void allasroll(){
+  allasPassive = true;
+  if(eAtk==2){
+    Rdmg = (int)(random(5)+5);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else if(eAtk==1){
+    Rdmg = (int)(random(4)+5);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else
+    Rdmg=0;
+}
+
+//wheels roll
+void wheelsroll(){
+  if(eAtk==2){
+    Rdmg = (int)(random(11)+14);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else if(eAtk==1){
+    Rdmg = (int)(random(4)+5);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else 
+    Rdmg=0;
+}
+
+//zelkova roll
+void zelkovaroll(){
+  if(eAtk==2){
+    Rdmg = (int)(random(5)+4);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+    
+  }
+  else if(eAtk==1){
+    Rdmg = (int)(random(5)+3);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else
+    Rdmg=0;
+}
+
+//old boys roll
+void oldboysroll(){
+  if(eAtk==2){
+    Rdmg = (int)(random(5)+5);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+    
+  }
+  else if(eAtk==1){
+    Rdmg = (int)(random(5)+4);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else
+    Rdmg=0;
+}
+
+//ranga roll
+void rangaroll(){
+  if(eAtk==3){
+    Rdmg = (int)(random(5)+3);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else if(eAtk==2){
+    Rdmg = (int)(random(5)+3);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else if(eAtk==1){
+    Rdmg = (int)(random(5)+3);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else
+    Rdmg=0;
+}
+
+//durandal roll
+void durandalroll(){
+  if(eAtk==2){
+    Rdmg = (int)(random(5)+5);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+    
+  }
+  else if(eAtk==1){
+    Rdmg = (int)(random(5)+5);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else
+    Rdmg=0;
+}
+
+//durandal
+void durandal(){
+  if(eAtk==2){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
+    image(Rsprite,rx,340,147,150);
+    Rfx = loadImage("roland/durandal.png");
+    image(Rfx,rx+120,300,163,210);
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Duralandal_Down.wav");
+  }
+  else if(eAtk==1){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
+    image(Rsprite,rx,300,135,150);
+    Rfx = loadImage("roland/durandal.png");
+    image(Rfx,rx+120,300,163,210);
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Duralandal_Up.wav");
+  }
+  
+  silence.play();
+  
+}
+
+//furioso
+void furioso(){
+  pAtk=0;
+  pause = false;
+  println("furiso: " + Rdmg);
+  println("eAtk: "+eAtk);
+  while(selected.size()>0){
+    selected.remove(0);
+  }
+  if(eAtk==17){
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Revolver.wav");
+    silence.play();
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial1.png");
+    image(Rsprite,rx,340,151,99);
+  }
+  else if(eAtk ==16){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial2.png");
+    silence.play();
+    image(Rsprite,rx,340,151,99);
+  }
+  else if(eAtk==15){
+    silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
+    Rsprite = loadImage("roland/BlackSilenceCombatPierce.png");
+    Rfx = loadImage("roland/allas.png");
+    silence.play();
+    image(Rsprite,rx+400,360,228,80);
+    image(Rfx,rx+430,330,228,120);
+  }
+  else if(eAtk==14){
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Mace.wav");
+    Rsprite = loadImage("roland/BlackSilenceCombatBluntm.png");
+    Rfx = loadImage("roland/rangam.png");
+    silence.play();
+    image(Rsprite,rx+300,330,105,95);
+    image(Rfx,rx+280,330,167,60);
+    delay(500);
+  }
+  else if(eAtk==13){
+    silence = new SoundFile(this,"black_silence_sfx/Roland_LongSword_Atk.wav");
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial4m.png");
+    Rfx = loadImage("roland/mookm.png");
+    image(Rfx,gx+30,350,80,80);
+    silence.play();
+    image(Rsprite,rx+300,340,150,95);
+  }
+  else if(eAtk==12){
+    silence = new SoundFile(this,"black_silence_sfx/Sword_Stab.wav");
+    silence.play();
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial5m.png");
+    image(Rsprite,rx+30,340,156,85);
+    Rfx = loadImage("roland/oldboys1m.png");
+    image(Rfx,rx,360,185,50);
+  }
+  else if(eAtk==11){
+    silence.play();
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial6.png");
+    image(Rsprite,rx+300,340,92,85);
+    Rfx = loadImage("roland/oldboys2m.png");
+    image(Rfx,rx+320,360,159,50);
+  }
+  else if(eAtk==10){
+    silence.play();
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial7m.png");
+    image(Rsprite,rx,340,202,85);
+  }
+  else if(eAtk==9){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial8.png");
+    Rfx = loadImage("roland/zelkova.png");
+    image(Rsprite,rx+30,340,169,100);
+    image(Rfx,rx+60,330,135,150);
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Axe.wav");
+    silence.play();
+  }
+  else if(eAtk==8){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial9.png");
+    Rfx = loadImage("roland/zelkova2.png");
+    image(Rsprite,rx+30,340,141,150);
+    image(Rfx,rx+60,330,162,180);
+    silence.play();
+  }
+  else if(eAtk==7){
+    silence = new SoundFile(this,"black_silence_sfx/Roland_GreatSword.wav");
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial10.png");
+    silence.play();
+    image(Rsprite,rx+20,280,252,180);
+  }
+  else if(eAtk == 6){
+    delay(500);
+    Rsprite = loadImage("roland/BlackSilenceCombatSlash.png");
+    image(Rsprite,rx+300,340,172,150);
+    Rfx = loadImage("roland/crystalatelier.png");
+    image(Rfx,rx+370,300,134,170);
+    silence = new SoundFile(this,"black_silence_sfx/Roland_DuelSword_Strong.wav");
+    silence.play();
+  }
+  else if(eAtk==5){
+    delay(250);
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial11m.png");
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Shotgun.wav");
+    silence.play();
+    image(Rsprite,rx+300,340,251,120);
+  }
+  else if(eAtk==4){
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial12m.png");
+    image(Rsprite,rx+300,340,147,150);
+    Rfx = loadImage("roland/durandalm.png");
+    image(Rfx,rx+250,300,163,210);
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Duralandal_Down.wav");
+    silence.play();
+  }
+  else if(eAtk==3){
+    delay(250);
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial13m.png");
+    image(Rsprite,rx,300,135,150);
+    Rfx = loadImage("roland/durandalm.png");
+    image(Rfx,rx-80,300,163,210);
+    silence = new SoundFile(this,"black_silence_sfx/Roland_Duralandal_Up.wav");
+    silence.play();
+  }
+  else if(eAtk==2){
+    delay(250);
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial14.png");
+    image(Rsprite,rx,350,125,150);
+    Rfx = loadImage("roland/durandal.png");
+    image(Rfx,rx+120,300,163,210);
+    silence = new SoundFile(this,"black_silence_sfx/furioso.wav");
+    silence.play();
+    player.damaged(Rdmg);
+    player.staggerDamage(Rdmg/2);
+  }
+  else if(eAtk==1){
+    delay(1000);
+    Rsprite = loadImage("roland/BlackSilenceCombatSpecial14.png");
+    image(Rsprite,rx,350,125,150);
+    Rfx = loadImage("roland/durandal.png");
+    image(Rfx,rx+120,300,163,210);
+    pause = true;
+  }
+  rx+=2;
+}
+
+//furioso roll
+void furiosoroll(){
+  if(eAtk==17){
+    Rdmg = (int)(random(20)+20);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else if(eAtk<=0){
+    eAtk=0;
+  }
+}
+
+//mook roll
+void mookroll(){
+  if(eAtk==1){
+    Rdmg = (int)(random(8)+8);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else 
+    Rdmg=0;
+}
+
+//crystal roll
+void crystalroll(){
+  if(eAtk==3){
+    Rdmg = (int)(random(4)+8);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else if(eAtk==2){
+    Rdmg = (int)(random(4)+7);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else if(eAtk==1){
+    Rdmg = (int)(random(4)+7);
+    textSize(20);
+    text(Rdmg,rx+60,335);
+  }
+  else
+    Rdmg=0;
 }

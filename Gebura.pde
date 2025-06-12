@@ -6,6 +6,7 @@ public class Gebura{
   int egoCount;
   int emotionlvl;
   int stagger;
+  int maxHealth;
   int maxStagger;
   String[] pages = { "Upstanding Slash", "Spear", "Level Slash", "Focus Spirit", "Onrush"};
   String[] pagedesc = {
@@ -25,6 +26,7 @@ public class Gebura{
   int dice;
   public Gebura(){
     hp = 120;
+    maxHealth=hp;
     stagger = 67;
     emotion = 0;
     emotionlvl = 0;
@@ -34,7 +36,10 @@ public class Gebura{
     egoCount = 0;
   }
   public void recoverHP(int value){
-    hp+=value;
+    hp+=value*4;
+    if(hp>maxHealth)
+      hp=maxHealth;
+    staggerDamage(-3*value);
   }
   public void damaged(int damage){
     hp-=damage;
@@ -71,7 +76,8 @@ public class Gebura{
   }
   public void addEmotion(int value){
     emotion+=value;
-    egoCount+=value;
+    if(value>0)
+      egoCount+=value;
     if(emotionlvl==0&&emotion==3){
       lvlEmotion();
       emotion=0;
