@@ -1871,11 +1871,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -2223,11 +2223,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -2621,11 +2621,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -2938,11 +2938,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -3255,11 +3255,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -3655,11 +3655,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -3972,11 +3972,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -4316,11 +4316,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -4629,11 +4629,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -5035,11 +5035,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -5598,11 +5598,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -5949,11 +5949,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
@@ -6210,11 +6210,11 @@ void draw(){
                   if(enemyPage==8){
                     if(eAtk==2){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial12.png");
-                      image(Rsprite,rx+300,340,176,180);
+                      image(Rsprite,rx,340,147,150);
                     }
                     else if(eAtk==1){
                       Rsprite = loadImage("roland/BlackSilenceCombatSpecial13.png");
-                      image(Rsprite,rx+30,340,162,180);
+                      image(Rsprite,rx,300,135,150);
                     }
                     eAtk--;
                   }
