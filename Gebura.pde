@@ -76,8 +76,11 @@ public class Gebura{
   }
   public void addEmotion(int value){
     emotion+=value;
-    if(value>0)
+    if(value>0){
       egoCount+=value;
+      if(egoCount>9)
+        egoCount=9;
+    }
     if(emotionlvl==0&&emotion==3){
       lvlEmotion();
       emotion=0;
